@@ -1,7 +1,7 @@
 // Dedicated Progress Window Logic matching IDM's standalone transfer dialog
 
 const urlParams = new URLSearchParams(window.location.search);
-const taskId = urlParams.get('taskId');
+const taskId = urlParams.get('taskId') || window.location.hash.replace(/^#/, '');
 let currentTask = null;
 
 function formatBytes(bytes) {

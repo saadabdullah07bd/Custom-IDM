@@ -12,9 +12,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow = null;
+let appIsQuitting = false;
 const progressWindows = new Map(); // taskId -> BrowserWindow
 const downloadInfoWindows = new Map(); // taskId -> BrowserWindow
 const queueManager = new QueueManager();
+
+app.on('before-quit', () => {
+  appIsQuitting = true;
+});
 
 let activeServerPort = 1001;
 
@@ -65,7 +70,8 @@ function openDownloadInfoWindow(taskId) {
 
   win.setMenu(null);
   win.loadFile(path.join(__dirname, '../renderer/download-info.html'), {
-    query: { taskId }
+    search: `?taskId=${encodeURIComponent(taskId)}`,
+    hash: taskId
   });
 
   downloadInfoWindows.set(taskId, win);
@@ -94,6 +100,13 @@ function createWindow() {
 
   mainWindow.setMenu(null);
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+
+  mainWindow.on('close', (event) => {
+    if (!appIsQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 
   // Forward queueManager events
   queueManager.on('task-added', (task) => {
@@ -127,7 +140,13 @@ ipcMain.handle('window-maximize', (event) => {
 
 ipcMain.handle('window-close', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
-  if (win) win.close();
+  if (win) {
+    if (win === mainWindow) {
+      win.hide();
+    } else {
+      win.close();
+    }
+  }
 });
 
 // IPC Handlers
@@ -145,6 +164,10 @@ ipcMain.handle('add-download', async (_event, options) => {
 ipcMain.handle('start-download-now', (_event, taskId) => {
   queueManager.startTask(taskId);
   return true;
+});
+
+ipcMain.handle('update-task-details', (_event, taskId, updates) => {
+  return queueManager.updateTask(taskId, updates);
 });
 
 ipcMain.handle('open-download-info', (_event, taskId) => {
@@ -184,7 +207,8 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
 
   win.setMenu(null);
   win.loadFile(path.join(__dirname, '../renderer/progress.html'), {
-    query: { taskId }
+    search: `?taskId=${encodeURIComponent(taskId)}`,
+    hash: taskId
   });
 
   progressWindows.set(taskId, win);

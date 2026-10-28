@@ -154,7 +154,7 @@ export async function sendToPersonalIDM(url, filename = '', options = {}) {
         body: JSON.stringify({
           url,
           filename,
-          autoStart: options.autoStart !== undefined ? options.autoStart : true
+          autoStart: options.autoStart !== undefined ? options.autoStart : false
         })
       });
 
@@ -165,8 +165,6 @@ export async function sendToPersonalIDM(url, filename = '', options = {}) {
       }
 
       if (res.ok) {
-        const data = await res.json();
-        notify('Download Started in Personal IDM', data.task ? data.task.filename : url);
         return true;
       }
       return false;
@@ -175,22 +173,6 @@ export async function sendToPersonalIDM(url, filename = '', options = {}) {
     }
   }
   return false;
-}
-
-function notify(title, message) {
-  if (typeof chrome !== 'undefined' && chrome.notifications && chrome.notifications.create) {
-    try {
-      const iconUrl = (typeof chrome.runtime !== 'undefined' && chrome.runtime.getURL)
-        ? chrome.runtime.getURL('images/logo48.png')
-        : 'images/logo48.png';
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl,
-        title,
-        message
-      });
-    } catch {}
-  }
 }
 
 // Register browser listeners only when running inside Chrome/Firefox/Edge extension environment
@@ -212,13 +194,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalle
   chrome.contextMenus.onClicked.addListener((info) => {
     const targetUrl = info.linkUrl || info.srcUrl || info.pageUrl;
     if (!targetUrl) return;
-    sendToPersonalIDM(targetUrl);
+    sendToPersonalIDM(targetUrl, '', { autoStart: false });
   });
 
-  // Handle messages from content script
+  // Handle messages from extension popup or other scripts
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message && message.type === 'DOWNLOAD_WITH_IDM' && message.url) {
-      sendToPersonalIDM(message.url, message.filename || '')
+      sendToPersonalIDM(message.url, message.filename || '', { autoStart: false })
         .then((ok) => sendResponse({ success: ok }))
         .catch((err) => sendResponse({ success: false, error: err.message }));
       return true; // Keep message channel open for async response

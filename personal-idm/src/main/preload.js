@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   openDownloadInfo: (taskId) => ipcRenderer.invoke('open-download-info', taskId),
   addDownload: (options) => ipcRenderer.invoke('add-download', options),
   startDownloadNow: (taskId) => ipcRenderer.invoke('start-download-now', taskId),
+  updateTaskDetails: (taskId, updates) => ipcRenderer.invoke('update-task-details', taskId, updates),
   probeUrl: (url) => ipcRenderer.invoke('probe-url', url),
   pauseDownload: (id) => ipcRenderer.invoke('pause-download', id),
   resumeDownload: (id) => ipcRenderer.invoke('resume-download', id),

@@ -312,6 +312,22 @@ export class QueueManager extends EventEmitter {
     this.startTask(id);
   }
 
+  updateTask(id, updates = {}) {
+    const task = this.tasks.get(id);
+    if (!task) return null;
+    if (updates.targetPath) {
+      task.targetPath = updates.targetPath;
+      task.targetDir = path.dirname(updates.targetPath);
+      task.filename = path.basename(updates.targetPath);
+    }
+    if (updates.category) {
+      task.category = updates.category;
+    }
+    this.saveTasks();
+    this.emit('task-updated', task.toJSON());
+    return task.toJSON();
+  }
+
   /**
    * Cancels and deletes a task, cleaning up its temporary directory (unless retainPartial is true)
    */

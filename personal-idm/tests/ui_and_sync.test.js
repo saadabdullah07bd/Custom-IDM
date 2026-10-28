@@ -291,4 +291,12 @@ test('Modern Frameless UI, IDM Permission Dialog, and Chrome Manifest V3 Complia
   const styleCss = await fs.promises.readFile(path.join(RENDERER_DIR, 'style.css'), 'utf8');
   assert.match(styleCss, /table-layout:\s*fixed;/, 'style.css must enforce fixed table layout to prevent horizontal scrollbars');
   assert.match(styleCss, /overflow-x:\s*hidden/, 'style.css must prevent horizontal overflowing');
+
+  // 8. Extension notifications and clashing icons removal
+  assert.equal(manifest.permissions.includes('notifications'), false, 'Notifications permission must be removed');
+  assert.equal(manifest.icons, undefined, 'Icons should be removed to avoid clashing with official IDM icons');
+  assert.equal(manifest.action?.default_icon, undefined, 'Action default_icon should be removed');
+
+  // 9. Window query/search parameter serialization in main.js
+  assert.match(mainJs, /search:\s*`\?taskId=\$\{encodeURIComponent\(taskId\)\}`/, 'main.js must pass taskId via search parameter');
 });

@@ -3,35 +3,16 @@
   "name": "Personal IDM Integration Module",
   "version": "1.0.0",
   "description": "Seamlessly intercepts and sends downloads to Personal IDM with multi-part acceleration.",
-  "icons": {
-    "16": "images/logo16.png",
-    "32": "images/logo32.png",
-    "48": "images/logo48.png",
-    "128": "images/logo128.png"
-  },
   "action": {
-    "default_icon": {
-      "16": "images/logo16.png",
-      "32": "images/logo32.png"
-    },
     "default_title": "Personal IDM Integration"
   },
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "permissions": [
     "contextMenus",
     "downloads",
-    "notifications",
     "storage"
   ],
   "host_permissions": [

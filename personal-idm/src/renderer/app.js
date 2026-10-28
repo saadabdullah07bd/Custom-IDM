@@ -945,10 +945,6 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     renderTable();
     updateCategoryCounts();
-    // Do NOT open progress window if task is pending (Download File Info permission dialog handles pending tasks)
-    if (task.status === 'downloading' || task.status === 'connecting') {
-      openDownloadStatus(task.id);
-    }
   });
 
   window.api.onTaskUpdated((task) => {
