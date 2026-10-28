@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Personal IDM Integration Module",
+  "version": "1.0.0",
+  "description": "Seamlessly intercepts and sends downloads to Personal IDM with multi-part acceleration.",
+  "action": {
+    "default_title": "Personal IDM Integration"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "contextMenus",
+    "downloads",
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "<all_urls>"
+  ]
+}

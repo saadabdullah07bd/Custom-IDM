@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Secrets & Environment
+.env
+.env.*
+*.token
+bridge-secret.token
+bridge-info.json
+config.json
+tasks.json
+
+# Temporary Download & Build Artifacts
+.idm_temp_*
+**/.idm_temp_*
+.idm_assembling_*
+*.tmp
+*.part
+dist/
+build/
+out/
+coverage/
+
+# Reverse Engineering / Scratch Artifacts (Do NOT commit proprietary binaries or scratch files)
+idman643build16.exe
+extracted_idm/
+extracted_payload.zip
+rea-rea-agents-6.8.0/
+/*.mjs
+extract_ui.py
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

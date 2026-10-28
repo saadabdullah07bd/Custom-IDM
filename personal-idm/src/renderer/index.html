@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internet Download Manager 6.43 — Personal IDM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- MAIN APPLICATION WINDOW -->
+  <div class="idm-window">
+    
+    <!-- CLASSIC WINDOWS MENU BAR -->
+    <div class="idm-menubar" role="menubar" aria-label="Application Menu">
+      <div class="menu-item" id="menuTasks" role="menuitem" tabindex="0"><u>T</u>asks</div>
+      <div class="menu-item" id="menuFile" role="menuitem" tabindex="0"><u>F</u>ile</div>
+      <div class="menu-item" id="menuDownloads" role="menuitem" tabindex="0"><u>D</u>ownloads</div>
+      <div class="menu-item" id="menuView" role="menuitem" tabindex="0"><u>V</u>iew</div>
+      <div class="menu-item" id="menuHelp" role="menuitem" tabindex="0"><u>H</u>elp</div>
+    </div>
+
+    <!-- CLASSIC IDM 3D ICON TOOLBAR -->
+    <div class="idm-toolbar" role="toolbar" aria-label="Main Download Actions">
+      <button class="tb-btn" id="tbAddUrl" title="Add new download URL (Insert)">
+        <div class="tb-icon icon-add"></div>
+        <span class="tb-label">Add URL</span>
+      </button>
+
+      <button class="tb-btn" id="tbResume" title="Resume selected download">
+        <div class="tb-icon icon-resume"></div>
+        <span class="tb-label">Resume</span>
+      </button>
+
+      <button class="tb-btn" id="tbStop" title="Stop selected download">
+        <div class="tb-icon icon-stop"></div>
+        <span class="tb-label">Stop</span>
+      </button>
+
+      <button class="tb-btn" id="tbStopAll" title="Stop all downloading tasks">
+        <div class="tb-icon icon-stopall"></div>
+        <span class="tb-label">Stop All</span>
+      </button>
+
+      <div class="tb-divider"></div>
+
+      <button class="tb-btn" id="tbDelete" title="Delete selected download (Del)">
+        <div class="tb-icon icon-delete"></div>
+        <span class="tb-label">Delete</span>
+      </button>
+
+      <button class="tb-btn" id="tbDeleteCompleted" title="Delete all completed tasks from list">
+        <div class="tb-icon icon-delete-comp"></div>
+        <span class="tb-label">Delete Compl.</span>
+      </button>
+
+      <div class="tb-divider"></div>
+
+      <button class="tb-btn" id="tbOptions" title="Configuration options">
+        <div class="tb-icon icon-options"></div>
+        <span class="tb-label">Options</span>
+      </button>
+
+      <button class="tb-btn" id="tbScheduler" title="Queue scheduler">
+        <div class="tb-icon icon-scheduler"></div>
+        <span class="tb-label">Scheduler</span>
+      </button>
+
+      <button class="tb-btn" id="tbStartQueue" title="Start downloading queue">
+        <div class="tb-icon icon-start-queue"></div>
+        <span class="tb-label">Start Queue</span>
+      </button>
+
+      <button class="tb-btn" id="tbStopQueue" title="Stop downloading queue">
+        <div class="tb-icon icon-stop-queue"></div>
+        <span class="tb-label">Stop Queue</span>
+      </button>
+
+      <button class="tb-btn" id="tbGrabber" title="Site Grabber">
+        <div class="tb-icon icon-grabber"></div>
+        <span class="tb-label">Grabber</span>
+      </button>
+    </div>
+
+    <!-- MAIN BODY: TREEVIEW ON LEFT, LISTVIEW ON RIGHT -->
+    <div class="idm-main-content">
+      
+      <!-- CLASSIC WIN32 TREEVIEW -->
+      <div class="idm-treeview-pane" role="tree" aria-label="Download Categories">
+        <div class="tree-root">
+          <!-- Categories Group -->
+          <div class="tree-node expanded">
+            <div class="tree-item-row" data-cat="all" role="treeitem" tabindex="0">
+              <span class="tree-toggle">▼</span>
+              <span class="tree-icon icon-folder-open"></span>
+              <span class="tree-text">Categories (<span id="countAll">0</span>)</span>
+            </div>
+            <div class="tree-children">
+              <div class="tree-item-row" data-cat="compressed" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-folder-yellow"></span>
+                <span class="tree-text">Compressed (<span id="countCompressed">0</span>)</span>
+              </div>
+              <div class="tree-item-row" data-cat="documents" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-folder-yellow"></span>
+                <span class="tree-text">Documents (<span id="countDocuments">0</span>)</span>
+              </div>
+              <div class="tree-item-row" data-cat="music" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-folder-yellow"></span>
+                <span class="tree-text">Music (<span id="countMusic">0</span>)</span>
+              </div>
+              <div class="tree-item-row" data-cat="programs" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-folder-yellow"></span>
+                <span class="tree-text">Programs (<span id="countPrograms">0</span>)</span>
+              </div>
+              <div class="tree-item-row" data-cat="video" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-folder-yellow"></span>
+                <span class="tree-text">Video (<span id="countVideo">0</span>)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Groups -->
+          <div class="tree-item-row" data-cat="unfinished" role="treeitem" tabindex="0">
+            <span class="tree-toggle" style="visibility: hidden;">▶</span>
+            <span class="tree-icon icon-folder-yellow"></span>
+            <span class="tree-text">Unfinished (<span id="countUnfinished">0</span>)</span>
+          </div>
+
+          <div class="tree-item-row" data-cat="finished" role="treeitem" tabindex="0">
+            <span class="tree-toggle" style="visibility: hidden;">▶</span>
+            <span class="tree-icon icon-folder-yellow"></span>
+            <span class="tree-text">Finished (<span id="countFinished">0</span>)</span>
+          </div>
+
+          <div class="tree-node expanded">
+            <div class="tree-item-row" data-cat="queue" role="treeitem" tabindex="0">
+              <span class="tree-toggle">▼</span>
+              <span class="tree-icon icon-queue"></span>
+              <span class="tree-text">Queues</span>
+            </div>
+            <div class="tree-children">
+              <div class="tree-item-row" data-cat="main-queue" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-queue-item"></span>
+                <span class="tree-text">Main download queue</span>
+              </div>
+              <div class="tree-item-row" data-cat="sync-queue" role="treeitem" tabindex="0">
+                <span class="tree-indent"></span>
+                <span class="tree-icon icon-queue-item"></span>
+                <span class="tree-text">Synchronization queue</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIZER BAR -->
+      <div class="idm-resizer" id="treeResizer" title="Drag to resize category pane"></div>
+
+      <!-- CLASSIC WIN32 LISTVIEW TABLE WITH FILTER BAR -->
+      <div class="idm-listview-pane">
+        <!-- Compact Filter & Search Header Bar -->
+        <div class="idm-filter-bar">
+          <div class="filter-left">
+            <label for="searchFilterInput" class="filter-lbl">Filter:</label>
+            <input type="text" id="searchFilterInput" class="win-input filter-search-input" placeholder="Search file name or URL...">
+            <select id="statusFilterSelect" class="win-select filter-status-select" aria-label="Filter by status">
+              <option value="all">Status: All</option>
+              <option value="downloading">Downloading</option>
+              <option value="paused">Paused / Queued</option>
+              <option value="completed">Completed</option>
+              <option value="error">Error</option>
+            </select>
+            <button class="win-btn-sm" id="clearFilterBtn" title="Reset search and status filters">Reset</button>
+          </div>
+          <div class="filter-right" id="activeFilterSummary">Showing all tasks</div>
+        </div>
+
+        <div class="table-scroll-wrap">
+          <table class="idm-table" id="downloadsTable">
+            <thead>
+              <tr>
+                <th class="col-name sortable-th" data-sort="filename" style="width: 245px;">File Name <span class="sort-indicator" id="sort-filename"></span></th>
+                <th class="col-size sortable-th" data-sort="totalBytes" style="width: 85px;">Size <span class="sort-indicator" id="sort-totalBytes"></span></th>
+                <th class="col-status sortable-th" data-sort="status" style="width: 120px;">Status <span class="sort-indicator" id="sort-status"></span></th>
+                <th class="col-time sortable-th" data-sort="timeLeft" style="width: 85px;">Time left <span class="sort-indicator" id="sort-timeLeft"></span></th>
+                <th class="col-speed sortable-th" data-sort="speed" style="width: 100px;">Transfer rate <span class="sort-indicator" id="sort-speed"></span></th>
+                <th class="col-date sortable-th" data-sort="addedAt" style="width: 115px;">Last Try Date <span class="sort-indicator" id="sort-addedAt"></span></th>
+                <th class="col-desc">Description / Integrity</th>
+              </tr>
+            </thead>
+            <tbody id="downloadsTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSIC SUNKEN STATUS BAR -->
+    <div class="idm-statusbar">
+      <div class="status-panel panel-left" id="sbTaskCount">0 downloads</div>
+      <div class="status-panel panel-mid" id="sbSpeed">Speed: 0.00 KB/sec</div>
+      <div class="status-panel panel-port" id="sbPortStatus">Bridge: 127.0.0.1:1001</div>
+      <div class="status-panel panel-right" id="sbDefaultDir">Save to: ~/Downloads</div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       THE ICONIC IDM DOWNLOAD STATUS DIALOG
+       ======================================================== -->
+  <div class="modal-backdrop" id="downloadDialogModal" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="idm-dialog-window">
+      <!-- Title bar -->
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <img src="assets/images/logo16.png" class="title-logo" alt="IDM">
+          <span class="title-text" id="dlgTitle">0% - Internet Download Manager</span>
+        </div>
+        <button class="dialog-title-btn" id="dlgCloseBtn" aria-label="Close dialog">✕</button>
+      </div>
+
+      <!-- Dialog Body -->
+      <div class="dialog-inner">
+        <!-- Tabs -->
+        <div class="dialog-tabs">
+          <div class="tab-item active" id="tabBtnStatus">Download status</div>
+          <div class="tab-item" id="tabBtnFileInfo">File info &amp; SHA-256</div>
+        </div>
+
+        <div class="dialog-tab-content" id="tabPaneStatus">
+          <!-- Info fields table -->
+          <div class="dlg-info-table">
+            <div class="dlg-row">
+              <span class="dlg-lbl">Status:</span>
+              <span class="dlg-val highlight-blue" id="dlgStatusText">Connecting...</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">File size:</span>
+              <span class="dlg-val tabular-nums" id="dlgFileSize">0.00 KB</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Downloaded:</span>
+              <span class="dlg-val tabular-nums" id="dlgDownloaded">0.00 KB (0.00%)</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Transfer rate:</span>
+              <span class="dlg-val tabular-nums" id="dlgTransferRate">0.00 KB/sec</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Time left:</span>
+              <span class="dlg-val tabular-nums" id="dlgTimeLeft">—</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Resume capability:</span>
+              <span class="dlg-val dlg-resume-val" id="dlgResumeCap">Yes</span>
+            </div>
+          </div>
+
+          <!-- THE ICONIC IDM GREEN PROGRESS BAR -->
+          <div class="idm-pbar-wrapper">
+            <div class="idm-pbar-sunken">
+              <div class="idm-pbar-fill" id="dlgProgressBar" style="width: 0%;"></div>
+            </div>
+            <div class="idm-pbar-text tabular-nums" id="dlgPercentLabel">0%</div>
+          </div>
+
+          <!-- THE ICONIC THREAD CONNECTIONS SEGMENTS BAR -->
+          <div class="idm-segments-box">
+            <div class="segments-title-row">
+              <span>Start positions and download progress by connections:</span>
+              <span id="dlgConnCount">8 connections</span>
+            </div>
+            <div class="segments-canvas-sunken" id="dlgSegmentsGrid">
+              <!-- Rendered dynamic thread lanes -->
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-tab-content" id="tabPaneFileInfo" style="display: none;">
+          <div class="dlg-info-table">
+            <div class="dlg-row">
+              <span class="dlg-lbl">Source URL:</span>
+              <span class="dlg-val" id="dlgInfoUrl" style="word-break: break-all;">—</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Saved Path:</span>
+              <span class="dlg-val" id="dlgInfoPath" style="word-break: break-all;">—</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Continuity Validator:</span>
+              <span class="dlg-val" id="dlgInfoEtag">—</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">SHA-256 Digest:</span>
+              <span class="dlg-val" id="dlgInfoSha256" style="font-family: Consolas, monospace; font-size: 10px; word-break: break-all;">Computed upon completion</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialog Bottom Push-buttons -->
+        <div class="dialog-button-bar">
+          <button class="win-btn" id="dlgPauseResumeBtn">Pause</button>
+          <button class="win-btn" id="dlgCancelBtn">Cancel</button>
+          <button class="win-btn default-btn" id="dlgOpenFileBtn" style="display: none;">Open</button>
+          <button class="win-btn" id="dlgOpenFolderBtn">Open Folder</button>
+          <button class="win-btn" id="dlgHideBtn">Hide</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CLASSIC IDM "ENTER NEW ADDRESS TO DOWNLOAD" DIALOG
+       ======================================================== -->
+  <div class="modal-backdrop" id="addUrlDialogModal" role="dialog" aria-modal="true" aria-labelledby="addUrlDlgTitle">
+    <div class="idm-dialog-window" style="width: 490px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <img src="assets/images/logo16.png" class="title-logo" alt="IDM">
+          <span class="title-text" id="addUrlDlgTitle">Enter new address to download</span>
+        </div>
+        <button class="dialog-title-btn" id="addUrlDlgClose" aria-label="Close">✕</button>
+      </div>
+
+      <div class="dialog-inner">
+        <div class="form-container">
+          <div class="form-field">
+            <label for="newUrlInput">Address (HTTP/HTTPS):</label>
+            <div class="field-with-btn">
+              <input type="text" id="newUrlInput" class="win-input" placeholder="https://example.com/archive.zip" autofocus>
+              <button class="win-btn-sm" id="btnPasteUrl">Paste</button>
+            </div>
+          </div>
+
+          <div class="url-probe-box" id="urlProbeBox" style="display: none;">
+            <div class="probe-line"><b>File Name:</b> <span id="probeFn">—</span></div>
+            <div class="probe-line"><b>Size:</b> <span id="probeSize">—</span></div>
+            <div class="probe-line"><b>Resume Capability:</b> <span id="probeResume">—</span></div>
+          </div>
+
+          <div class="form-field">
+            <label for="savePathInput">Save to directory:</label>
+            <div class="field-with-btn">
+              <input type="text" id="savePathInput" class="win-input" readonly>
+              <button class="win-btn-sm" id="btnBrowseDir">Browse...</button>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-field flex-1">
+              <label for="customFilenameInput">File Name (Optional):</label>
+              <input type="text" id="customFilenameInput" class="win-input" placeholder="Auto-detected from server">
+            </div>
+            <div class="form-field" style="width: 140px;">
+              <label for="selectThreads">Max Connections:</label>
+              <select id="selectThreads" class="win-select">
+                <option value="1">1 connection</option>
+                <option value="4">4 connections</option>
+                <option value="8" selected>8 connections</option>
+                <option value="16">16 connections</option>
+                <option value="32">32 connections</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="expectedSha256Input">Expected SHA-256 Checksum (Optional):</label>
+            <input type="text" id="expectedSha256Input" class="win-input" placeholder="Optional 64-character hex digest for integrity verification">
+          </div>
+        </div>
+
+        <div class="dialog-button-bar" style="margin-top: 10px;">
+          <button class="win-btn default-btn" id="btnStartDownload">OK</button>
+          <button class="win-btn" id="btnDownloadLater">Download Later</button>
+          <button class="win-btn" id="btnCancelAdd">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       OPTIONS / CONFIGURATION DIALOG
+       ======================================================== -->
+  <div class="modal-backdrop" id="optionsDialogModal" role="dialog" aria-modal="true" aria-labelledby="optDlgTitle">
+    <div class="idm-dialog-window" style="width: 500px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <img src="assets/images/logo16.png" class="title-logo" alt="IDM">
+          <span class="title-text" id="optDlgTitle">Internet Download Manager Configuration</span>
+        </div>
+        <button class="dialog-title-btn" id="optionsCloseBtn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="dialog-inner">
+        <div class="dialog-tabs">
+          <div class="tab-item active" id="optTabGeneralBtn">General &amp; Save To</div>
+          <div class="tab-item" id="optTabConnBtn">Connection &amp; Speed</div>
+          <div class="tab-item" id="optTabBridgeBtn">Browser Integration</div>
+        </div>
+
+        <div class="dialog-tab-content" id="optPaneGeneral">
+          <fieldset class="win-fieldset">
+            <legend>Default Download Location</legend>
+            <div class="form-field">
+              <label for="optSaveDir">Default download directory for new tasks:</label>
+              <div class="field-with-btn">
+                <input type="text" id="optSaveDir" class="win-input" readonly>
+                <button class="win-btn-sm" id="optBrowseBtn">Browse...</button>
+              </div>
+              <span class="field-hint">Changes apply to newly added downloads without moving active transfers.</span>
+            </div>
+          </fieldset>
+
+          <fieldset class="win-fieldset">
+            <legend>Queue Concurrency</legend>
+            <div class="form-field">
+              <label for="optMaxConcurrent">Maximum simultaneous active downloads (1–10):</label>
+              <select id="optMaxConcurrent" class="win-select" style="width: 160px;">
+                <option value="1">1 task at a time</option>
+                <option value="2">2 tasks</option>
+                <option value="3" selected>3 tasks (Recommended)</option>
+                <option value="5">5 tasks</option>
+                <option value="8">8 tasks</option>
+                <option value="10">10 tasks</option>
+              </select>
+              <span class="field-hint">Additional tasks wait in the queue and start automatically as slots open.</span>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="dialog-tab-content" id="optPaneConn" style="display: none;">
+          <fieldset class="win-fieldset">
+            <legend>Segmented Acceleration Connections</legend>
+            <div class="form-field">
+              <label for="optDefaultConn">Default max connections per file (1–32):</label>
+              <select id="optDefaultConn" class="win-select" style="width: 180px;">
+                <option value="1">1 (Single stream)</option>
+                <option value="4">4 connections</option>
+                <option value="8" selected>8 connections (Standard)</option>
+                <option value="16">16 connections (High speed)</option>
+                <option value="32">32 connections (Maximum)</option>
+              </select>
+              <span class="field-hint">Uses adaptive work-stealing range segmentation when the server supports HTTP Range requests.</span>
+            </div>
+          </fieldset>
+
+          <fieldset class="win-fieldset">
+            <legend>Bandwidth Rate Limiter</legend>
+            <div class="form-field">
+              <label for="optSpeedLimit">Global download speed limit (KB/sec, 0 = Unlimited):</label>
+              <input type="number" id="optSpeedLimit" class="win-input" min="0" step="64" value="0" style="width: 180px;">
+              <span class="field-hint">Enforces smooth token-bucket backpressure across active connections. Set to 0 for unrestricted speed.</span>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="dialog-tab-content" id="optPaneBridge" style="display: none;">
+          <fieldset class="win-fieldset">
+            <legend>Authenticated Loopback Integration Bridge</legend>
+            <div class="dlg-info-table">
+              <div class="dlg-row">
+                <span class="dlg-lbl">Active Loopback Endpoint:</span>
+                <span class="dlg-val"><code id="optActivePortLabel">127.0.0.1:1001</code></span>
+              </div>
+              <div class="dlg-row">
+                <span class="dlg-lbl">API Protocol Version:</span>
+                <span class="dlg-val">v1.0 (Bearer Token + Extension Origin Validation)</span>
+              </div>
+              <div class="dlg-row">
+                <span class="dlg-lbl">Fallback Ports:</span>
+                <span class="dlg-val">Auto-probes <code>1001</code>, <code>10010</code>–<code>10014</code></span>
+              </div>
+            </div>
+            <p class="field-hint" style="margin-top: 6px;">
+              The Chrome/Edge extension in <code>browser-extension/</code> automatically discovers the active port via <code>/api/v1/discovery</code> and performs an authenticated handshake via <code>/api/v1/handshake</code>.
+            </p>
+          </fieldset>
+        </div>
+
+        <div class="dialog-button-bar" style="margin-top: 10px;">
+          <button class="win-btn default-btn" id="optSaveBtn">OK</button>
+          <button class="win-btn" id="optCancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MANDATORY TOOLBAR DIALOG 1: DOWNLOAD SCHEDULER
+       ======================================================== -->
+  <div class="modal-backdrop" id="schedulerDialogModal" role="dialog" aria-modal="true" aria-labelledby="schedDlgTitle">
+    <div class="idm-dialog-window" style="width: 470px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <img src="assets/images/logo16.png" class="title-logo" alt="IDM">
+          <span class="title-text" id="schedDlgTitle">Download Scheduler — Queue &amp; Timed Automation</span>
+        </div>
+        <button class="dialog-title-btn" id="schedulerCloseBtn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="dialog-inner">
+        <div class="info-notice-banner">
+          <b>Status:</b> Timed Scheduling Not Yet Implemented in Current Build
+        </div>
+
+        <fieldset class="win-fieldset">
+          <legend>Intended Feature Purpose</legend>
+          <p class="info-paragraph">
+            The <b>IDM Scheduler</b> is designed for scheduling downloads and managing timed download queues automatically:
+          </p>
+          <ul class="info-feature-list">
+            <li>Start and stop download queues at scheduled clock times or days of the week.</li>
+            <li>Limit active concurrent downloads per queue and retry failed transfers automatically.</li>
+            <li>Perform post-completion actions (such as hanging up modem/network connections or exiting Personal IDM).</li>
+          </ul>
+          <p class="info-paragraph" style="margin-top: 6px;">
+            <b>Current Availability:</b> Automated time-based triggers are not yet enabled. You can manually start and stop the active download queue at any time using the <b>Start Queue</b> and <b>Stop Queue</b> buttons on the main toolbar.
+          </p>
+        </fieldset>
+
+        <div class="dialog-button-bar">
+          <button class="win-btn default-btn" id="schedulerOkBtn">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MANDATORY TOOLBAR DIALOG 2: IDM SITE GRABBER
+       ======================================================== -->
+  <div class="modal-backdrop" id="grabberDialogModal" role="dialog" aria-modal="true" aria-labelledby="grabberDlgTitle">
+    <div class="idm-dialog-window" style="width: 470px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <img src="assets/images/logo16.png" class="title-logo" alt="IDM">
+          <span class="title-text" id="grabberDlgTitle">IDM Site Grabber — Website Resource Collector</span>
+        </div>
+        <button class="dialog-title-btn" id="grabberCloseBtn" aria-label="Close">✕</button>
+      </div>
+
+      <div class="dialog-inner">
+        <div class="info-notice-banner">
+          <b>Status:</b> Website Crawling Not Yet Implemented in Current Build
+        </div>
+
+        <fieldset class="win-fieldset">
+          <legend>Intended Feature Purpose</legend>
+          <p class="info-paragraph">
+            The <b>IDM Site Grabber</b> is intended for collecting downloadable resources from websites using customizable link-following and file-type filters:
+          </p>
+          <ul class="info-feature-list">
+            <li>Explore a target URL up to a specified link depth across same-domain or external pages.</li>
+            <li>Collect all matching audio, video, archive, image, or document assets for batch queuing.</li>
+            <li>Mirror website directory structures for offline browsing.</li>
+          </ul>
+          <p class="info-paragraph" style="margin-top: 6px;">
+            <b>Current Availability:</b> Full multi-page website crawling is not yet available. To download direct file links immediately, click <b>Add URL</b> on the toolbar or use the <b>Personal IDM Browser Extension</b> context menu.
+          </p>
+        </fieldset>
+
+        <div class="dialog-button-bar">
+          <button class="win-btn default-btn" id="grabberOkBtn">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

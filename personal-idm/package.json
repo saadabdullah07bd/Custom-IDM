@@ -1,0 +1,24 @@
+{
+  "name": "personal-idm",
+  "version": "1.0.0",
+  "description": "Personal Internet Download Manager - A high performance multi-part segmented download accelerator",
+  "main": "src/main/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.js",
+    "benchmark": "node tests/benchmark.js"
+  },
+  "keywords": [
+    "download-manager",
+    "idm",
+    "multi-part",
+    "accelerator",
+    "electron"
+  ],
+  "author": "Personal IDM",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^45.1.0"
+  }
+}

@@ -1,0 +1,916 @@
+/* ==========================================================================
+   AUTHENTIC IDM (INTERNET DOWNLOAD MANAGER) CLASSIC WINDOWS STYLESHEET
+   100% Genuine IDM Look-and-Feel with Original 3D Bitmaps & Modernized Clarity
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+  font-size: 11px;
+}
+
+body {
+  background-color: #f0f0f0;
+  color: #000000;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keyboard focus accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.tree-item-row:focus-visible,
+.menu-item:focus-visible {
+  outline: 1px dotted #003399;
+  outline-offset: -1px;
+}
+
+/* ==========================================================================
+   MAIN WINDOW LAYOUT
+   ========================================================================== */
+.idm-window {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+/* ==========================================================================
+   CLASSIC WINDOWS MENUBAR
+   ========================================================================== */
+.idm-menubar {
+  display: flex;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #dcdcdc;
+  padding: 2px 6px;
+  gap: 2px;
+}
+
+.menu-item {
+  padding: 3px 8px;
+  cursor: pointer;
+  color: #000;
+}
+
+.menu-item:hover {
+  background-color: #316ac5;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   CLASSIC IDM 3D ICON TOOLBAR (USING ORIGINAL IDM BITMAP ASSETS)
+   ========================================================================== */
+.idm-toolbar {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #808080;
+  padding: 3px 6px;
+  gap: 2px;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.tb-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 56px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  transition: all 0.08s ease;
+}
+
+.tb-btn:hover {
+  border: 1px solid #7f9db9;
+  background: linear-gradient(to bottom, #ffffff 0%, #e5f1fb 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tb-btn:active {
+  border: 1px solid #0a246a;
+  background: linear-gradient(to bottom, #cce0f5 0%, #b8d6f3 100%);
+}
+
+.tb-btn:hover .tb-icon {
+  background-image: url('assets/toolbar/3d_largeHot_3.bmp') !important;
+}
+
+.tb-icon {
+  width: 42px;
+  height: 42px;
+  background-image: url('assets/toolbar/3d_large_3.bmp');
+  background-repeat: no-repeat;
+  display: block;
+}
+
+/* Map toolbar icon coordinates (each icon is 42px wide) */
+.icon-add          { background-position: 0px 0px; }
+.icon-resume       { background-position: -42px 0px; }
+.icon-stop         { background-position: -84px 0px; }
+.icon-stopall      { background-position: -126px 0px; }
+.icon-delete       { background-position: -168px 0px; }
+.icon-delete-comp  { background-position: -210px 0px; }
+.icon-options      { background-position: -252px 0px; }
+.icon-scheduler    { background-position: -294px 0px; }
+.icon-start-queue  { background-position: -336px 0px; }
+.icon-stop-queue   { background-position: -378px 0px; }
+.icon-grabber      { background-position: -420px 0px; }
+
+.tb-label {
+  font-size: 10px;
+  color: #000000;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+.tb-divider {
+  width: 2px;
+  height: 48px;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  margin: 0 4px;
+}
+
+/* ==========================================================================
+   MAIN CONTENT: SPLIT TREEVIEW & LISTVIEW
+   ========================================================================== */
+.idm-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 4px;
+  background-color: #f0f0f0;
+  gap: 3px;
+}
+
+/* CLASSIC TREEVIEW */
+.idm-treeview-pane {
+  width: 205px;
+  min-width: 150px;
+  background-color: #ffffff;
+  border: 1px solid #7f9db9;
+  overflow-y: auto;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tree-root {
+  padding: 4px;
+}
+
+.tree-item-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+
+.tree-item-row:hover {
+  background-color: #e5f1fb;
+}
+
+.tree-item-row.selected {
+  background-color: #316ac5;
+  color: #ffffff;
+}
+
+.tree-item-row.selected .tree-toggle {
+  color: #ffffff;
+}
+
+.tree-toggle {
+  font-size: 8px;
+  width: 10px;
+  color: #555;
+}
+
+.tree-indent {
+  width: 14px;
+  display: inline-block;
+}
+
+.tree-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.icon-folder-open   { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%23e8a723" d="M1 3h5l2 2h7v2H3l-2 6V3z"/><path fill="%23f9d55b" d="M1 7h14l-2 7H1z"/></svg>'); }
+.icon-folder-yellow { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="%23e8a723" d="M1 2h5l2 2h7v9H1V2z"/><path fill="%23f9d55b" d="M2 4h12v7H2V4z"/></svg>'); }
+.icon-queue         { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" fill="%23316ac5" rx="1"/><line x1="4" y1="5" x2="12" y2="5" stroke="%23fff" stroke-width="1.5"/><line x1="4" y1="8" x2="12" y2="8" stroke="%23fff" stroke-width="1.5"/><line x1="4" y1="11" x2="10" y2="11" stroke="%23fff" stroke-width="1.5"/></svg>'); }
+.icon-queue-item    { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="%2310b981"/><polyline points="5 8 7 10 11 6" fill="none" stroke="%23fff" stroke-width="1.5"/></svg>'); }
+
+.tree-text {
+  font-size: 11px;
+}
+
+/* RESIZER */
+.idm-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background-color: #f0f0f0;
+}
+
+/* CLASSIC LISTVIEW TABLE */
+.idm-listview-pane {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1px solid #7f9db9;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* QUICK FILTER BAR (Mobbin Snowflake-inspired compact filter header) */
+.idm-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, #f9f9f9 0%, #ededed 100%);
+  border-bottom: 1px solid #b5b5b5;
+  padding: 3px 6px;
+  gap: 8px;
+}
+
+.filter-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-lbl {
+  font-weight: bold;
+  color: #333;
+}
+
+.filter-search-input {
+  width: 210px;
+  height: 20px !important;
+}
+
+.filter-status-select {
+  height: 20px !important;
+  width: 130px;
+}
+
+.filter-right {
+  font-size: 10.5px;
+  color: #444;
+  white-space: nowrap;
+}
+
+.table-scroll-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.idm-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+}
+
+.idm-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.idm-table th {
+  background: linear-gradient(to bottom, #ffffff 0%, #ece9d8 100%);
+  border-right: 1px solid #999999;
+  border-bottom: 1px solid #808080;
+  border-top: 1px solid #ffffff;
+  padding: 3px 6px;
+  font-weight: normal;
+  text-align: left;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sortable-th {
+  cursor: pointer;
+}
+
+.sortable-th:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #dce8f6 100%);
+}
+
+.sortable-th:active {
+  background: #dbd8c7;
+}
+
+.sort-indicator {
+  font-size: 9px;
+  color: #003399;
+  margin-left: 2px;
+}
+
+.idm-table tbody tr {
+  height: 22px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.idm-table tbody tr:hover {
+  background-color: #e5f1fb;
+}
+
+.idm-table tbody tr.selected {
+  background-color: #316ac5;
+  color: #ffffff;
+}
+
+.idm-table td {
+  padding: 2px 6px;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 11px;
+}
+
+.cell-file {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.file-type-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+.icon-zip  { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="3" y="1" width="10" height="14" fill="%23d97706" rx="1"/><rect x="6" y="2" width="4" height="2" fill="%23fff"/></svg>'); }
+.icon-exe  { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" fill="%230284c7" rx="2"/><polygon points="6,4 12,8 6,12" fill="%23fff"/></svg>'); }
+.icon-doc  { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="3" y="1" width="10" height="14" fill="%232563eb" rx="1"/><line x1="5" y1="5" x2="11" y2="5" stroke="%23fff" stroke-width="1.5"/><line x1="5" y1="8" x2="11" y2="8" stroke="%23fff" stroke-width="1.5"/></svg>'); }
+.icon-video { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" fill="%23dc2626" rx="1"/><polygon points="6,5 11,8 6,11" fill="%23fff"/></svg>'); }
+.icon-music { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="%239333ea"/><path d="M7 6v4a1.5 1.5 0 1 1-1-1.4V5l4-1v4a1.5 1.5 0 1 1-1-1.4V4z" fill="%23fff"/></svg>'); }
+
+/* Inline Status Badges & Mini Progress Bar */
+.status-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid transparent;
+}
+
+.badge-completed {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.badge-paused {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.badge-pending {
+  background-color: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.badge-merging {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.inline-pbar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+
+.inline-pbar-bg {
+  flex: 1;
+  height: 11px;
+  background: #e5e7eb;
+  border: 1px solid #808080;
+  overflow: hidden;
+}
+
+.inline-pbar-fill {
+  height: 100%;
+  background: linear-gradient(to bottom, #40e040 0%, #009900 100%);
+}
+
+.inline-pbar-text {
+  font-size: 10px;
+  font-weight: bold;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Empty State Row */
+.empty-state-row td {
+  padding: 36px 16px !important;
+  text-align: center;
+  background-color: #fafafa;
+  cursor: default;
+}
+
+.empty-state-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+}
+
+.empty-state-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #222;
+}
+
+.empty-state-sub {
+  font-size: 11px;
+  color: #666;
+}
+
+/* ==========================================================================
+   CLASSIC SUNKEN STATUS BAR
+   ========================================================================== */
+.idm-statusbar {
+  display: flex;
+  background-color: #f0f0f0;
+  border-top: 1px solid #808080;
+  padding: 3px 4px;
+  gap: 4px;
+}
+
+.status-panel {
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
+  padding: 2px 6px;
+  font-size: 11px;
+  background-color: #f0f0f0;
+  white-space: nowrap;
+}
+
+.panel-left   { width: 130px; }
+.panel-mid    { width: 180px; }
+.panel-port   { width: 160px; color: #003399; }
+.panel-right  { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+/* ==========================================================================
+   MODAL BACKDROP (AUTHENTIC FLOATING WINDOW SIMULATION)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+/* ==========================================================================
+   THE ICONIC IDM DOWNLOAD PROGRESS POPUP WINDOW
+   ========================================================================== */
+.idm-dialog-window {
+  width: 530px;
+  background-color: #f0f0f0;
+  border: 1px solid #0055ea;
+  border-radius: 4px;
+  box-shadow: 2px 4px 14px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #0058e6 0%, #3b88f6 100%);
+  color: #ffffff;
+  padding: 4px 6px;
+  font-weight: bold;
+}
+
+.dialog-title-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.title-logo {
+  width: 16px;
+  height: 16px;
+}
+
+.title-text {
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 470px;
+}
+
+.dialog-title-btn {
+  background: #c75050;
+  color: #fff;
+  border: 1px solid #852222;
+  border-radius: 2px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-title-btn:hover {
+  background: #e81123;
+}
+
+.dialog-inner {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Classic Dialog Tabs */
+.dialog-tabs {
+  display: flex;
+  border-bottom: 1px solid #919b9c;
+  padding-left: 6px;
+  gap: 2px;
+}
+
+.tab-item {
+  padding: 4px 10px;
+  border: 1px solid #919b9c;
+  border-bottom: none;
+  background-color: #e0dfe3;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-bottom: -1px;
+}
+
+.tab-item.active {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: bold;
+}
+
+.dialog-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dlg-info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.dlg-row {
+  display: flex;
+  font-size: 11.5px;
+}
+
+.dlg-lbl {
+  width: 145px;
+  color: #000000;
+}
+
+.dlg-val {
+  flex: 1;
+  font-weight: normal;
+  color: #000000;
+}
+
+.highlight-blue {
+  color: #0033cc;
+  font-weight: bold;
+}
+
+.dlg-resume-val {
+  font-weight: bold;
+  color: #008000;
+}
+
+/* ==========================================================================
+   THE ICONIC IDM GREEN SEGMENTED PROGRESS BAR
+   ========================================================================== */
+.idm-pbar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.idm-pbar-sunken {
+  flex: 1;
+  height: 18px;
+  background-color: #ffffff;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
+  padding: 1px;
+  overflow: hidden;
+}
+
+.idm-pbar-fill {
+  height: 100%;
+  background: linear-gradient(to bottom, #40e040 0%, #00a000 50%, #008000 100%);
+  border-radius: 1px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: width 0.12s ease-out;
+}
+
+.idm-pbar-text {
+  width: 45px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   THE ICONIC IDM THREAD CONNECTIONS / SEGMENTS BAR
+   ========================================================================== */
+.idm-segments-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.segments-title-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #444;
+}
+
+.segments-canvas-sunken {
+  height: 82px;
+  background-color: #000000;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
+  padding: 3px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.thread-lane-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 12px;
+}
+
+.thread-lane-tag {
+  width: 46px;
+  font-size: 9px;
+  color: #00ff00;
+  font-family: Consolas, monospace;
+}
+
+.thread-lane-bar-bg {
+  flex: 1;
+  height: 9px;
+  background-color: #1e1e1e;
+  border: 1px solid #333333;
+  overflow: hidden;
+}
+
+.thread-lane-fill {
+  height: 100%;
+  background: linear-gradient(to right, #00aa00, #00ff00);
+  transition: width 0.12s linear;
+}
+
+.thread-lane-fill.lane-completed {
+  background: linear-gradient(to right, #16a34a, #4ade80);
+}
+
+.thread-lane-fill.lane-pending {
+  background: linear-gradient(to right, #ca8a04, #facc15);
+}
+
+.thread-lane-fill.lane-error {
+  background: linear-gradient(to right, #b91c1c, #f87171);
+}
+
+.thread-lane-percent {
+  width: 32px;
+  font-size: 9px;
+  color: #ffffff;
+  font-family: Consolas, monospace;
+  text-align: right;
+}
+
+/* Bottom Button Bar */
+.dialog-button-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.win-btn {
+  min-width: 75px;
+  height: 23px;
+  padding: 0 10px;
+  background: linear-gradient(to bottom, #f2f2f2 0%, #ebebeb 50%, #dddddd 51%, #cfcfcf 100%);
+  border: 1px solid #707070;
+  border-radius: 3px;
+  color: #000000;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.win-btn:hover {
+  border-color: #3c7fb1;
+  background: linear-gradient(to bottom, #eaf6fd 0%, #d9f0fc 50%, #bee6fd 51%, #a7d9f5 100%);
+}
+
+.win-btn:active {
+  background: linear-gradient(to bottom, #c4e5f6 0%, #98d1ef 50%, #68b3db 51%, #79bee2 100%);
+}
+
+.win-btn.default-btn {
+  border: 1px solid #0055ea;
+  font-weight: bold;
+}
+
+.win-btn-sm {
+  height: 20px;
+  padding: 0 8px;
+  background: #e1e1e1;
+  border: 1px solid #707070;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.win-btn-sm:hover {
+  border-color: #3c7fb1;
+  background: #e5f1fb;
+}
+
+/* ==========================================================================
+   CLASSIC WIN32 FORMS & INFORMATIVE MODALS
+   ========================================================================== */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.form-field label {
+  font-size: 11px;
+}
+
+.field-hint {
+  font-size: 10px;
+  color: #555555;
+  line-height: 1.35;
+}
+
+.field-with-btn {
+  display: flex;
+  gap: 4px;
+}
+
+.win-input {
+  flex: 1;
+  height: 22px;
+  padding: 2px 5px;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+  border-right: 1px solid #ffffff;
+  background-color: #ffffff;
+  outline: none;
+  font-size: 11px;
+}
+
+.win-input:focus {
+  border: 1px solid #316ac5;
+}
+
+.win-select {
+  height: 22px;
+  padding: 1px 4px;
+  border: 1px solid #808080;
+  background-color: #ffffff;
+  font-size: 11px;
+}
+
+.form-row-2 {
+  display: flex;
+  gap: 8px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.url-probe-box {
+  background: #ffffe1;
+  border: 1px solid #e6db55;
+  padding: 6px 8px;
+  font-size: 10.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.win-fieldset {
+  border: 1px solid #c8c8c8;
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.win-fieldset legend {
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #003399;
+}
+
+.info-notice-banner {
+  background-color: #fffbeb;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 6px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+}
+
+.info-paragraph {
+  font-size: 11px;
+  color: #222222;
+  line-height: 1.45;
+}
+
+.info-feature-list {
+  margin: 6px 0 4px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #333333;
+  line-height: 1.35;
+}
