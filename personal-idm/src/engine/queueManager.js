@@ -414,6 +414,11 @@ export class QueueManager extends EventEmitter {
 
   getTask(id) {
     const task = this.tasks.get(id);
-    return task ? task.toJSON() : null;
+    if (!task) return null;
+    return typeof task.toJSON === 'function' ? task.toJSON() : task;
+  }
+
+  getTaskInstance(id) {
+    return this.tasks.get(id) || null;
   }
 }

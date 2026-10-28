@@ -639,7 +639,7 @@ function setupToolbarEvents() {
   });
 
   // Main Toolbar buttons
-  document.getElementById('tbAddUrl').addEventListener('click', openAddUrlDialog);
+  document.getElementById('tbAddUrl').addEventListener('click', () => openAddUrlDialog());
 
   document.getElementById('tbResume').addEventListener('click', () => {
     const id = state.selectedTaskId || getActiveOrSelectedTaskId();
@@ -849,16 +849,18 @@ function setupToolbarEvents() {
 }
 
 async function openAddUrlDialog(prefillUrl = '', prefillFilename = '') {
-  document.getElementById('newUrlInput').value = prefillUrl || '';
-  document.getElementById('customFilenameInput').value = prefillFilename || '';
+  const safePrefill = typeof prefillUrl === 'string' ? prefillUrl.trim() : '';
+  const safeFilename = typeof prefillFilename === 'string' ? prefillFilename.trim() : '';
+  document.getElementById('newUrlInput').value = safePrefill;
+  document.getElementById('customFilenameInput').value = safeFilename;
   const shaInput = document.getElementById('expectedSha256Input');
   if (shaInput) shaInput.value = '';
   document.getElementById('savePathInput').value = state.defaultDir;
   document.getElementById('urlProbeBox').style.display = 'none';
   addUrlDialogModal?.classList.add('open');
 
-  if (prefillUrl) {
-    probeEnteredUrl(prefillUrl);
+  if (safePrefill) {
+    probeEnteredUrl(safePrefill);
     return;
   }
 
@@ -872,6 +874,8 @@ async function openAddUrlDialog(prefillUrl = '', prefillFilename = '') {
 }
 
 async function probeEnteredUrl(url) {
+  if (!url || typeof url !== 'string' || !url.trim()) return;
+  url = url.trim();
   const box = document.getElementById('urlProbeBox');
   const fnLbl = document.getElementById('probeFn');
   const sizeLbl = document.getElementById('probeSize');

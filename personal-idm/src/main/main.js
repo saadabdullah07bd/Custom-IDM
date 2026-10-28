@@ -162,7 +162,8 @@ ipcMain.handle('get-tasks', () => queueManager.getAllTasks());
 
 ipcMain.handle('get-task-by-id', (_event, taskId) => {
   const task = queueManager.getTask(taskId);
-  return task ? task.toJSON() : null;
+  if (!task) return null;
+  return typeof task.toJSON === 'function' ? task.toJSON() : task;
 });
 
 ipcMain.handle('add-download', async (_event, options) => {
@@ -237,12 +238,20 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
 });
 
 ipcMain.handle('probe-url', async (_event, url) => {
-  const probe = await probeUrl(url);
+  let cleanUrl = url;
+  if (typeof cleanUrl === 'object' && cleanUrl !== null) {
+    cleanUrl = cleanUrl.url || '';
+  }
+  if (!cleanUrl || typeof cleanUrl !== 'string' || !cleanUrl.trim()) {
+    throw new Error('Invalid URL: empty or invalid parameter');
+  }
+  cleanUrl = cleanUrl.trim();
+  const probe = await probeUrl(cleanUrl);
   const category = getCategoryByFilename(probe.filename);
   const catFolder = getCategoryFolderName(category);
   const suggestedDir = path.join(queueManager.defaultDownloadDir, catFolder);
   return {
-    url,
+    url: cleanUrl,
     finalUrl: probe.finalUrl,
     filename: probe.filename,
     totalBytes: probe.contentLength,

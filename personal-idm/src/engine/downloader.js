@@ -191,7 +191,12 @@ const THROTTLE_STATUS_CODES = new Set([429, 503]);
  * Probes target URL for size, resume support, validators (ETag/Last-Modified), and filename
  */
 export async function probeUrl(urlStr, headers = {}, options = {}) {
-  let currentUrl = urlStr;
+  let currentUrl = (typeof urlStr === 'object' && urlStr !== null && urlStr.url) ? urlStr.url : urlStr;
+  if (!currentUrl || typeof currentUrl !== 'string') {
+    const err = new Error(`Invalid URL: ${currentUrl}`);
+    err.isFatal = true;
+    throw err;
+  }
   let redirects = 0;
   const maxRedirects = 10;
   const timeoutMs = options.timeoutMs || 12000;

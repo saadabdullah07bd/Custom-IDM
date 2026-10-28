@@ -166,28 +166,30 @@ async function init() {
 
       // Probe in background if size is not yet detected
       if (!task.totalBytes || task.totalBytes <= 0) {
-        window.api.probeUrl(task.url).then((probe) => {
-          if (probe && probe.totalBytes) {
-            const sizeEl = document.getElementById('infoSizeText');
-            if (sizeEl) sizeEl.textContent = formatBytes(probe.totalBytes);
+        if (task.url && typeof task.url === 'string' && task.url.trim()) {
+          window.api.probeUrl(task.url.trim()).then((probe) => {
+            if (probe && probe.totalBytes) {
+              const sizeEl = document.getElementById('infoSizeText');
+              if (sizeEl) sizeEl.textContent = formatBytes(probe.totalBytes);
 
-            const descEl = document.getElementById('infoDescription');
-            if (descEl && probe.filename && (!currentTask || !currentTask.filename)) {
-              descEl.value = probe.filename;
-            }
+              const descEl = document.getElementById('infoDescription');
+              if (descEl && probe.filename && (!currentTask || !currentTask.filename)) {
+                descEl.value = probe.filename;
+              }
 
-            const pathEl = document.getElementById('infoSavePath');
-            if (pathEl && probe.suggestedDir && (!pathEl.value || pathEl.value.trim() === '')) {
-              pathEl.value = `${probe.suggestedDir}\\${probe.filename || 'download'}`;
+              const pathEl = document.getElementById('infoSavePath');
+              if (pathEl && probe.suggestedDir && (!pathEl.value || pathEl.value.trim() === '')) {
+                pathEl.value = `${probe.suggestedDir}\\${probe.filename || 'download'}`;
+              }
+            } else {
+              const sizeEl = document.getElementById('infoSizeText');
+              if (sizeEl) sizeEl.textContent = 'Unknown size (Dynamic stream)';
             }
-          } else {
+          }).catch(() => {
             const sizeEl = document.getElementById('infoSizeText');
             if (sizeEl) sizeEl.textContent = 'Unknown size (Dynamic stream)';
-          }
-        }).catch(() => {
-          const sizeEl = document.getElementById('infoSizeText');
-          if (sizeEl) sizeEl.textContent = 'Unknown size (Dynamic stream)';
-        });
+          });
+        }
       }
     } else {
       const sizeEl = document.getElementById('infoSizeText');
