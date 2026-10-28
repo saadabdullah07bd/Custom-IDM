@@ -11,105 +11,204 @@
       padding: 0;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--font-family);
       overflow: hidden;
       user-select: none;
     }
+
     .custom-titlebar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 32px;
-      padding: 0 10px;
+      height: 38px;
+      padding: 0 12px;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
       -webkit-app-region: drag;
     }
+
     .titlebar-text {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
+
+    .titlebar-mark {
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+    }
+
     .titlebar-controls {
       display: flex;
       align-items: center;
       -webkit-app-region: no-drag;
     }
+
     .titlebar-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      width: 28px;
-      height: 24px;
+      width: 32px;
+      height: 28px;
       font-size: 13px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--radius-sm);
+      transition: all 0.12s;
     }
+
     .titlebar-btn:hover {
       background: var(--table-row-hover);
       color: var(--text-primary);
     }
+
     .titlebar-btn.close:hover {
       background: var(--color-danger);
       color: #ffffff;
     }
+
     .info-container {
-      padding: 14px 16px;
+      padding: 16px 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      height: calc(100vh - 32px);
+      gap: 12px;
+      height: calc(100vh - 38px);
       box-sizing: border-box;
+      background: var(--card-bg);
     }
+
     .info-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
+
     .info-label {
-      width: 65px;
+      width: 70px;
       font-size: 12px;
       color: var(--text-secondary);
-      font-weight: 500;
+      font-weight: 600;
       flex-shrink: 0;
       text-align: right;
     }
+
     .info-field-wrap {
       flex: 1;
       display: flex;
-      gap: 6px;
-    }
-    .size-box {
-      display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      margin-left: 75px;
     }
-    .size-icon {
-      color: var(--accent-color);
-    }
-    .size-text {
-      font-size: 13px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
+
+    .dc-input {
+      flex: 1;
+      background: #141620;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
       color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 12px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
+
+    .dc-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+
+    .dc-select {
+      background: #141620;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .dc-select:focus {
+      border-color: var(--accent-color);
+    }
+
+    .dc-btn {
+      background: var(--card-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .dc-btn:hover {
+      background: var(--table-row-hover);
+      border-color: var(--text-secondary);
+    }
+
+    .dc-btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(124, 92, 252, 0.35);
+    }
+
+    .dc-btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      box-shadow: 0 3px 12px rgba(124, 92, 252, 0.5);
+    }
+
+    .size-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #12131b;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-left: 82px;
+    }
+
+    .size-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .resume-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(76, 217, 100, 0.15);
+      color: var(--color-success);
+      font-weight: 600;
+    }
+
     .button-bar {
       margin-top: auto;
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      padding-top: 10px;
+      gap: 10px;
+      padding-top: 12px;
       border-top: 1px solid var(--border-color);
     }
   </style>
@@ -119,11 +218,13 @@
   <!-- Custom Frameless Titlebar -->
   <div class="custom-titlebar">
     <div class="titlebar-text">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
+      <span class="titlebar-mark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </span>
       <span>Download File Info</span>
     </div>
     <div class="titlebar-controls">
@@ -136,7 +237,7 @@
     <div class="info-row">
       <span class="info-label">URL:</span>
       <div class="info-field-wrap">
-        <input type="text" id="infoUrl" class="win-input" readonly style="font-size: 11.5px; opacity: 0.85;" />
+        <input type="text" id="infoUrl" class="dc-input win-input" readonly style="opacity: 0.9;" />
       </div>
     </div>
 
@@ -144,7 +245,7 @@
     <div class="info-row">
       <span class="info-label">Category:</span>
       <div class="info-field-wrap">
-        <select id="infoCategory" class="win-select" style="width: 140px;">
+        <select id="infoCategory" class="dc-select win-select" style="min-width: 150px;">
           <option value="compressed">Compressed</option>
           <option value="documents">Documents</option>
           <option value="music">Music</option>
@@ -159,36 +260,36 @@
     <div class="info-row">
       <span class="info-label">Save As:</span>
       <div class="info-field-wrap">
-        <input type="text" id="infoSavePath" class="win-input" />
-        <button class="win-btn win-btn-sm" id="btnBrowseSave">...</button>
+        <input type="text" id="infoSavePath" class="dc-input win-input" />
+        <button class="dc-btn win-btn win-btn-sm" id="btnBrowseSave" style="padding: 7px 12px;">...</button>
       </div>
     </div>
 
     <!-- Detected Size Banner -->
-    <div class="size-box">
-      <div class="size-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <div class="size-banner size-box">
+      <div class="size-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
+        <span class="size-text" id="infoSizeText">Detecting size...</span>
       </div>
-      <div>
-        <div style="font-size: 10.5px; color: var(--text-muted);">Payload Size:</div>
-        <div class="size-text" id="infoSizeText">Detecting size...</div>
+      <div class="resume-pill">
+        <span>✓</span> Resumable
       </div>
     </div>
 
     <!-- Description -->
-    <div class="info-row" style="align-items: flex-start;">
-      <span class="info-label" style="margin-top: 4px;">Description:</span>
+    <div class="info-row">
+      <span class="info-label">Description:</span>
       <div class="info-field-wrap">
-        <input type="text" id="infoDescription" class="win-input" placeholder="File download request" />
+        <input type="text" id="infoDescription" class="dc-input win-input" placeholder="File download request" />
       </div>
     </div>
 
-    <!-- Action Buttons matching IDM -->
+    <!-- Action Buttons -->
     <div class="button-bar">
-      <button class="win-btn win-btn-accent" id="btnStartDownload">Start Download</button>
-      <button class="win-btn" id="btnCancel">Cancel</button>
+      <button class="dc-btn dc-btn-primary win-btn win-btn-accent" id="btnStartDownload">Start Download</button>
+      <button class="dc-btn win-btn" id="btnCancel">Cancel</button>
     </div>
   </div>
 

@@ -78,6 +78,25 @@ function updateUI(task) {
   document.getElementById('progBarFill').style.width = `${percent}%`;
   document.getElementById('progPercent').textContent = `${percent}%`;
 
+  // Render connection segment strips if available
+  const conns = task.maxConnections || 4;
+  const connEl = document.getElementById('connCountLabel');
+  if (connEl) connEl.textContent = `${conns} connection${conns > 1 ? 's' : ''}`;
+  const strip = document.getElementById('segmentsStrip');
+  if (strip) {
+    if (task.segments && Array.isArray(task.segments) && task.segments.length > 0) {
+      strip.innerHTML = task.segments.map(s => {
+        const segLen = (s.end - s.start + 1) || 1;
+        const pct = Math.min(100, Math.max(0, ((s.downloaded || 0) / segLen) * 100));
+        return `<div class="segment-chunk" style="width: ${100 / task.segments.length}%; opacity: ${pct > 0 ? 0.9 : 0.3};"></div>`;
+      }).join('');
+    } else {
+      strip.innerHTML = Array.from({ length: conns }).map(() =>
+        `<div class="segment-chunk" style="width: ${100 / conns}%;"></div>`
+      ).join('');
+    }
+  }
+
   document.getElementById('progSavedPath').textContent = task.targetPath || '—';
   document.getElementById('progEtag').textContent = task.etag || task.lastModified || 'None';
   document.getElementById('progSha256').textContent = task.sha256
@@ -128,6 +147,17 @@ async function init() {
   });
   document.getElementById('btnProgClose')?.addEventListener('click', () => {
     window.close();
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const targetPane = document.getElementById(btn.dataset.tab);
+      if (targetPane) targetPane.classList.add('active');
+    });
   });
 
   // Buttons

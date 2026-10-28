@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "Personal IDM Integration Module",
+  "version": "1.0.0",
+  "description": "Seamlessly intercepts and sends downloads to Personal IDM with multi-part acceleration.",
+  "browser_action": {
+    "default_title": "Personal IDM Integration"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "contextMenus",
+    "downloads",
+    "storage",
+    "http://127.0.0.1/*",
+    "<all_urls>"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "personal-idm@integration.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}

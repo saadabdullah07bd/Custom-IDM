@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('api', {
   getTaskById: (taskId) => ipcRenderer.invoke('get-task-by-id', taskId),
   openProgressWindow: (taskId) => ipcRenderer.invoke('open-progress-window', taskId),
   openDownloadInfo: (taskId) => ipcRenderer.invoke('open-download-info', taskId),
+  openCompleteWindow: (taskId) => ipcRenderer.invoke('open-complete-window', taskId),
   addDownload: (options) => ipcRenderer.invoke('add-download', options),
   startDownloadNow: (taskId) => ipcRenderer.invoke('start-download-now', taskId),
   updateTaskDetails: (taskId, updates) => ipcRenderer.invoke('update-task-details', taskId, updates),

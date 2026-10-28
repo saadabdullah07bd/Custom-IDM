@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Complete</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .custom-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 36px;
+      padding: 0 12px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      -webkit-app-region: drag;
+    }
+
+    .titlebar-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .titlebar-mark {
+      color: var(--color-success);
+      display: flex;
+      align-items: center;
+    }
+
+    .titlebar-controls {
+      display: flex;
+      align-items: center;
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 32px;
+      height: 26px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all 0.12s;
+    }
+
+    .titlebar-btn:hover {
+      background: var(--table-row-hover);
+      color: var(--text-primary);
+    }
+
+    .titlebar-btn.close:hover {
+      background: var(--color-danger);
+      color: #ffffff;
+    }
+
+    .complete-container {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: calc(100vh - 36px);
+      box-sizing: border-box;
+      background: var(--card-bg);
+    }
+
+    /* Summary Row */
+    .summary-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .summary-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(76, 217, 100, 0.15);
+      color: var(--color-success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .summary-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .summary-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .summary-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Field Blocks */
+    .field-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .dc-input {
+      background: #141620;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 11.5px;
+      padding: 6px 10px;
+      outline: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dc-input:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* Button Bar */
+    .button-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .dc-btn {
+      flex: 1;
+      background: var(--card-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: center;
+    }
+
+    .dc-btn:hover {
+      background: var(--table-row-hover);
+      border-color: var(--text-secondary);
+    }
+
+    .dc-btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(124, 92, 252, 0.35);
+    }
+
+    .dc-btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    /* Opt-out Checkbox */
+    .opt-out-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .opt-out-row input {
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Frameless Titlebar -->
+  <div class="custom-titlebar">
+    <div class="titlebar-text">
+      <span class="titlebar-mark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="9 12 11.5 14.5 15.5 9.5"></polyline>
+        </svg>
+      </span>
+      <span>Download Complete</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn close" id="btnTitleClose" title="Close">✕</button>
+    </div>
+  </div>
+
+  <div class="complete-container">
+    <!-- Summary -->
+    <div class="summary-row">
+      <div class="summary-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+      </div>
+      <div class="summary-text">
+        <div class="summary-title" id="completeFileName">download.zip</div>
+        <div class="summary-sub" id="completeFileSize">0.00 KB · Complete</div>
+      </div>
+    </div>
+
+    <!-- Address / Source URL -->
+    <div class="field-block">
+      <span class="field-label">Address</span>
+      <input type="text" class="dc-input" id="completeUrl" readonly value="—">
+    </div>
+
+    <!-- Saved Location -->
+    <div class="field-block">
+      <span class="field-label">The file was saved as</span>
+      <input type="text" class="dc-input" id="completeSavedPath" readonly value="—">
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-bar">
+      <button class="dc-btn dc-btn-primary" id="btnOpen">Open</button>
+      <button class="dc-btn" id="btnOpenFolder">Open Folder</button>
+      <button class="dc-btn" id="btnClose">Close</button>
+    </div>
+
+    <!-- Opt-out -->
+    <label class="opt-out-row">
+      <input type="checkbox" id="chkDontShowAgain">
+      <span>Don't show this dialog again</span>
+    </label>
+  </div>
+
+  <script src="complete.js"></script>
+</body>
+</html>

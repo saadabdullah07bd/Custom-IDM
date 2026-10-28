@@ -35,3 +35,5 @@ extract_ui.py
 Thumbs.db
 *.log
 npm-debug.log*
+*.xpi
+downloadcraft-master/

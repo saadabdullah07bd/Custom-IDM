@@ -15,6 +15,7 @@ let mainWindow = null;
 let appIsQuitting = false;
 const progressWindows = new Map(); // taskId -> BrowserWindow
 const downloadInfoWindows = new Map(); // taskId -> BrowserWindow
+const completeWindows = new Map(); // taskId -> BrowserWindow
 const queueManager = new QueueManager();
 
 app.on('before-quit', () => {
@@ -89,6 +90,55 @@ function openDownloadInfoWindow(taskId) {
   });
 }
 
+function openCompleteWindow(taskId) {
+  if (!taskId) return;
+  if (completeWindows.has(taskId)) {
+    const existing = completeWindows.get(taskId);
+    if (!existing.isDestroyed()) {
+      existing.show();
+      existing.focus();
+      return;
+    }
+    completeWindows.delete(taskId);
+  }
+
+  const win = new BrowserWindow({
+    width: 460,
+    height: 240,
+    minWidth: 420,
+    minHeight: 220,
+    frame: false,
+    titleBarStyle: 'hidden',
+    resizable: false,
+    show: false,
+    backgroundColor: '#0f1016',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  win.setMenu(null);
+  win.loadFile(path.join(__dirname, '../renderer/complete.html'), {
+    search: `?taskId=${encodeURIComponent(taskId)}`,
+    hash: taskId
+  });
+
+  win.once('ready-to-show', () => {
+    win.show();
+    win.focus();
+    win.setAlwaysOnTop(true);
+    win.setAlwaysOnTop(false);
+  });
+
+  completeWindows.set(taskId, win);
+
+  win.on('closed', () => {
+    completeWindows.delete(taskId);
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1060,
@@ -126,7 +176,10 @@ function createWindow() {
     }
   });
   queueManager.on('task-updated', (task) => forwardToAll('task-updated', task));
-  queueManager.on('task-completed', (task) => forwardToAll('task-completed', task));
+  queueManager.on('task-completed', (task) => {
+    forwardToAll('task-completed', task);
+    openCompleteWindow(task.id);
+  });
   queueManager.on('task-deleted', (id) => forwardToAll('task-deleted', id));
   queueManager.on('task-error', (err) => forwardToAll('task-error', err));
   queueManager.on('settings-updated', (settings) => forwardToAll('settings-updated', settings));
@@ -234,6 +287,11 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
     progressWindows.delete(taskId);
   });
 
+  return true;
+});
+
+ipcMain.handle('open-complete-window', (_event, taskId) => {
+  openCompleteWindow(taskId);
   return true;
 });
 

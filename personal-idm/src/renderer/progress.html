@@ -11,71 +11,149 @@
       padding: 0;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--font-family);
       overflow: hidden;
       user-select: none;
     }
+
     .custom-titlebar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 32px;
-      padding: 0 10px;
+      height: 38px;
+      padding: 0 12px;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
       -webkit-app-region: drag;
     }
+
     .titlebar-text {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      min-width: 0;
     }
+
+    .titlebar-mark {
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    #winTitleText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 380px;
+    }
+
     .titlebar-controls {
       display: flex;
       align-items: center;
       -webkit-app-region: no-drag;
+      flex-shrink: 0;
     }
+
     .titlebar-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      width: 28px;
-      height: 24px;
+      width: 32px;
+      height: 28px;
       font-size: 13px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--radius-sm);
+      transition: all 0.12s;
     }
+
     .titlebar-btn:hover {
       background: var(--table-row-hover);
       color: var(--text-primary);
     }
+
     .titlebar-btn.close:hover {
       background: var(--color-danger);
       color: #ffffff;
     }
+
     .progress-container {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 32px);
+      height: calc(100vh - 38px);
       box-sizing: border-box;
-      padding: 14px 16px;
-      gap: 10px;
+      padding: 14px 18px;
+      gap: 12px;
+      background: var(--card-bg);
     }
+
+    /* DownloadCraft Segmented Tabs */
+    .tab-strip {
+      display: flex;
+      background: var(--sunken-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-family: var(--font-family);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* File Header */
     .file-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px solid var(--border-color);
     }
+
     .file-badge {
-      padding: 5px 9px;
+      padding: 4px 8px;
       border-radius: var(--radius-sm);
       background: var(--accent-color);
       color: #ffffff;
@@ -83,10 +161,12 @@
       font-weight: 700;
       letter-spacing: 0.5px;
     }
+
     .file-details {
       flex: 1;
       min-width: 0;
     }
+
     .file-name {
       font-size: 13px;
       font-weight: 600;
@@ -95,6 +175,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .file-sub {
       font-size: 11px;
       color: var(--text-muted);
@@ -103,8 +184,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    /* Metrics Card */
     .metrics-card {
-      background: var(--card-bg);
+      background: #141620;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       padding: 10px 14px;
@@ -112,52 +195,103 @@
       flex-direction: column;
       gap: 6px;
     }
+
     .metric-row {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
     }
+
     .metric-label {
       color: var(--text-secondary);
       font-weight: 500;
     }
+
     .metric-value {
       font-weight: 600;
       color: var(--text-primary);
     }
-    .highlight-blue {
+
+    .highlight-purple {
       color: var(--accent-color);
     }
+
     .highlight-speed {
       color: var(--color-success);
     }
+
+    /* Progress Bar */
     .progress-bar-wrap {
-      margin: 4px 0 2px 0;
+      margin: 2px 0;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
+
     .progress-bar-bg {
       flex: 1;
-      height: 14px;
+      height: 12px;
       background: var(--sunken-bg);
       border: 1px solid var(--border-color);
-      border-radius: 3px;
+      border-radius: 6px;
       overflow: hidden;
       position: relative;
     }
+
     .progress-bar-fill {
       height: 100%;
-      background: var(--accent-color);
+      background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
       width: 0%;
       transition: width 0.15s ease-out;
+      border-radius: 5px;
     }
+
     .progress-bar-text {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
-      min-width: 44px;
+      min-width: 45px;
       text-align: right;
+      color: var(--text-primary);
     }
+
+    /* Visual Connection Segments Strip */
+    .segments-section {
+      background: #12131b;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+    }
+
+    .segments-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .segments-strip {
+      display: flex;
+      height: 10px;
+      background: var(--sunken-bg);
+      border-radius: 4px;
+      overflow: hidden;
+      gap: 1px;
+    }
+
+    .segment-chunk {
+      height: 100%;
+      background: var(--accent-color);
+      opacity: 0.85;
+      transition: width 0.2s ease;
+    }
+
+    .segment-chunk:nth-child(even) {
+      background: var(--accent-secondary);
+    }
+
+    /* Collapsible Details */
     .collapsible-header {
       font-size: 11px;
       font-weight: 600;
@@ -165,12 +299,18 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-top: 4px;
+      gap: 6px;
+      margin-top: 2px;
+      transition: color 0.12s;
     }
+
+    .collapsible-header:hover {
+      color: var(--text-primary);
+    }
+
     .collapsible-body {
       display: none;
-      background: var(--card-bg);
+      background: #141620;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
       padding: 8px 10px;
@@ -178,16 +318,101 @@
       margin-top: 4px;
       word-break: break-all;
     }
+
     .collapsible-body.open {
       display: block;
     }
+
+    /* Options & Limiter Forms */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #141620;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .form-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .dc-input {
+      background: #101118;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+    }
+
+    .dc-input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .checkbox-row, .radio-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .checkbox-row input, .radio-row input {
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    /* Action Buttons */
     .button-row {
       margin-top: auto;
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      padding-top: 8px;
+      gap: 10px;
+      padding-top: 10px;
       border-top: 1px solid var(--border-color);
+    }
+
+    .dc-btn {
+      background: var(--card-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .dc-btn:hover {
+      background: var(--table-row-hover);
+      border-color: var(--text-secondary);
+    }
+
+    .dc-btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(124, 92, 252, 0.35);
+    }
+
+    .dc-btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      box-shadow: 0 3px 12px rgba(124, 92, 252, 0.5);
     }
   </style>
 </head>
@@ -196,11 +421,13 @@
   <!-- Custom Frameless Titlebar -->
   <div class="custom-titlebar">
     <div class="titlebar-text">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
+      <span class="titlebar-mark">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </span>
       <span id="winTitleText">Download Progress</span>
     </div>
     <div class="titlebar-controls">
@@ -210,69 +437,138 @@
   </div>
 
   <div class="progress-container">
-    <!-- Header -->
-    <div class="file-header">
-      <div class="file-badge" id="progBadge">FILE</div>
-      <div class="file-details">
-        <div class="file-name" id="progFileName">Initializing download...</div>
-        <div class="file-sub" id="progUrl">—</div>
+    <!-- DownloadCraft 3-Segmented Tabs -->
+    <div class="tab-strip">
+      <button class="tab-btn active" data-tab="tabStatus">Download status</button>
+      <button class="tab-btn" data-tab="tabLimiter">Speed limiter</button>
+      <button class="tab-btn" data-tab="tabOptions">Options on completion</button>
+    </div>
+
+    <!-- TAB 1: Download Status -->
+    <div class="tab-pane active" id="tabStatus">
+      <!-- File Header -->
+      <div class="file-header">
+        <div class="file-badge" id="progBadge">FILE</div>
+        <div class="file-details">
+          <div class="file-name" id="progFileName">Initializing download...</div>
+          <div class="file-sub" id="progUrl">—</div>
+        </div>
+      </div>
+
+      <!-- Metrics Card -->
+      <div class="metrics-card">
+        <div class="metric-row">
+          <span class="metric-label">Status:</span>
+          <span class="metric-value highlight-purple" id="progStatus">Connecting...</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">File size:</span>
+          <span class="metric-value tabular-nums" id="progFileSize">0.00 KB</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Downloaded:</span>
+          <span class="metric-value tabular-nums" id="progDownloaded">0.00 KB (0%)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Transfer rate:</span>
+          <span class="metric-value highlight-speed tabular-nums" id="progSpeed">0.00 KB/sec</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Time left:</span>
+          <span class="metric-value tabular-nums" id="progTimeLeft">—</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Resume support:</span>
+          <span class="metric-value" id="progResume">Yes</span>
+        </div>
+      </div>
+
+      <!-- Accent Progress Bar -->
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progBarFill"></div>
+        </div>
+        <span class="progress-bar-text tabular-nums" id="progPercent">0%</span>
+      </div>
+
+      <!-- Visual Dynamic Segments / Connections Strip -->
+      <div class="segments-section">
+        <div class="segments-header">
+          <span>Connections &amp; Work-Stealing Segments</span>
+          <span id="connCountLabel">4 connections</span>
+        </div>
+        <div class="segments-strip" id="segmentsStrip">
+          <div class="segment-chunk" style="width: 25%;"></div>
+          <div class="segment-chunk" style="width: 25%;"></div>
+          <div class="segment-chunk" style="width: 25%;"></div>
+          <div class="segment-chunk" style="width: 25%;"></div>
+        </div>
+      </div>
+
+      <!-- Collapsible Details -->
+      <div>
+        <div class="collapsible-header" id="btnToggleDetails">
+          <span id="detailsChevron">▶</span> File Details &amp; Checksum
+        </div>
+        <div class="collapsible-body" id="detailsBody">
+          <div style="margin-bottom: 4px;"><b>Saved to:</b> <span id="progSavedPath">—</span></div>
+          <div style="margin-bottom: 4px;"><b>ETag:</b> <span id="progEtag">None</span></div>
+          <div><b>SHA-256:</b> <span id="progSha256">Calculated upon completion</span></div>
+        </div>
       </div>
     </div>
 
-    <!-- Metrics Card -->
-    <div class="metrics-card">
-      <div class="metric-row">
-        <span class="metric-label">Status:</span>
-        <span class="metric-value highlight-blue" id="progStatus">Connecting...</span>
-      </div>
-      <div class="metric-row">
-        <span class="metric-label">File size:</span>
-        <span class="metric-value tabular-nums" id="progFileSize">0.00 KB</span>
-      </div>
-      <div class="metric-row">
-        <span class="metric-label">Downloaded:</span>
-        <span class="metric-value tabular-nums" id="progDownloaded">0.00 KB (0%)</span>
-      </div>
-      <div class="metric-row">
-        <span class="metric-label">Transfer rate:</span>
-        <span class="metric-value highlight-speed tabular-nums" id="progSpeed">0.00 KB/sec</span>
-      </div>
-      <div class="metric-row">
-        <span class="metric-label">Time left:</span>
-        <span class="metric-value tabular-nums" id="progTimeLeft">—</span>
-      </div>
-      <div class="metric-row">
-        <span class="metric-label">Resume support:</span>
-        <span class="metric-value" id="progResume">Yes</span>
+    <!-- TAB 2: Speed Limiter -->
+    <div class="tab-pane" id="tabLimiter">
+      <div class="form-group">
+        <label class="checkbox-row">
+          <input type="checkbox" id="chkEnableLimiter">
+          <span class="form-label" style="margin: 0;">Enable Speed Limiter</span>
+        </label>
+        <div class="form-sub">Throttle maximum download bandwidth used by this transfer</div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+          <input type="number" id="inputSpeedLimit" class="dc-input" value="1024" min="10" step="50" style="width: 120px;">
+          <span style="font-size: 12px; color: var(--text-secondary);">KB/sec</span>
+          <button class="dc-btn dc-btn-primary" id="btnApplySpeedLimit" style="padding: 6px 14px;">Apply</button>
+        </div>
       </div>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progBarFill"></div>
-      </div>
-      <span class="progress-bar-text tabular-nums" id="progPercent">0%</span>
-    </div>
-
-    <!-- Collapsible File Details -->
-    <div>
-      <div class="collapsible-header" id="btnToggleDetails">
-        <span id="detailsChevron">▶</span> File Details &amp; Checksum
-      </div>
-      <div class="collapsible-body" id="detailsBody">
-        <div style="margin-bottom: 4px;"><b>Saved to:</b> <span id="progSavedPath">—</span></div>
-        <div style="margin-bottom: 4px;"><b>ETag:</b> <span id="progEtag">None</span></div>
-        <div><b>SHA-256:</b> <span id="progSha256">Calculated upon completion</span></div>
+    <!-- TAB 3: Options on Completion -->
+    <div class="tab-pane" id="tabOptions">
+      <div class="form-group">
+        <span class="form-label">On Download Completion</span>
+        <label class="checkbox-row" style="margin-top: 4px;">
+          <input type="checkbox" id="chkShowCompleteDialog" checked>
+          <span>Show Download Complete dialog card</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="chkCloseOnFinish">
+          <span>Close this progress window automatically</span>
+        </label>
+        <div style="height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+        <span class="form-label">Computer Action</span>
+        <label class="radio-row">
+          <input type="radio" name="finishAction" value="none" checked>
+          <span>Do nothing</span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="finishAction" value="sleep">
+          <span>Put computer to Sleep / Hibernate</span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="finishAction" value="shutdown">
+          <span>Shut down computer when all downloads complete</span>
+        </label>
       </div>
     </div>
 
     <!-- Actions -->
     <div class="button-row">
-      <button class="win-btn" id="btnPauseResume">Pause</button>
-      <button class="win-btn" id="btnCancel">Cancel</button>
-      <button class="win-btn win-btn-accent" id="btnOpenFile" style="display: none;">Open File</button>
-      <button class="win-btn" id="btnOpenFolder">Open Folder</button>
+      <button class="dc-btn win-btn" id="btnPauseResume">Pause</button>
+      <button class="dc-btn win-btn" id="btnCancel">Cancel</button>
+      <button class="dc-btn dc-btn-primary win-btn win-btn-accent" id="btnOpenFile" style="display: none;">Open File</button>
+      <button class="dc-btn win-btn" id="btnOpenFolder">Open Folder</button>
     </div>
   </div>
 

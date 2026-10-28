@@ -1,39 +1,42 @@
-/* Personal IDM — Sleek Minimalist Desktop Style */
+/* Personal IDM — Modern Minimalist Desktop Style (DownloadCraft Theme) */
 
 :root {
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
   
-  /* Dark Theme (Default) */
-  --bg-primary: #090d16;
-  --bg-secondary: #0f172a;
-  --card-bg: #1e293b;
-  --table-header-bg: #0f172a;
-  --table-row-hover: #243046;
-  --table-row-selected: #1e3a5f;
-  --border-color: #334155;
-  --border-subtle: #475569;
-  --sunken-bg: #0f172a;
+  /* DownloadCraft Minimalist Dark Theme (Default) */
+  --bg-primary: #0f1016;
+  --bg-secondary: #12131a;
+  --card-bg: #1a1b24;
+  --card-raised: #242532;
+  --table-header-bg: #12131a;
+  --table-row-hover: #1c2436;
+  --table-row-selected: #242c44;
+  --border-color: #232430;
+  --border-subtle: #334155;
+  --sunken-bg: #0a0a14;
   
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
   
-  --accent-color: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-light: #1e293b;
+  --accent-color: #7c5cfc;
+  --accent-hover: #6a46f9;
+  --accent-secondary: #b85dff;
+  --accent-blue: #3b82f6;
+  --accent-light: rgba(124, 92, 252, 0.12);
   
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-purple: #7c3aed;
+  --color-success: #4cd964;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-purple: #7c5cfc;
   
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-lg: 10px;
   
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-dialog: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --shadow-dialog: 0 20px 30px rgba(0, 0, 0, 0.7);
 }
 
 [data-theme="light"] {
