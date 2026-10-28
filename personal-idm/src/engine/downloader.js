@@ -235,6 +235,18 @@ export async function probeUrl(urlStr, headers = {}, options = {}) {
 
       req.on('error', (err) => reject(formatNetworkError(err)));
       req.setTimeout(timeoutMs, () => req.destroy(new Error('Probe timeout')));
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          req.destroy(new Error('Aborted'));
+          return reject(new Error('Aborted'));
+        }
+        options.signal.addEventListener('abort', () => {
+          req.destroy(new Error('Aborted'));
+          reject(new Error('Aborted'));
+        }, { once: true });
+      }
+
       req.end();
     });
 
@@ -376,6 +388,18 @@ async function probeUrlWithGet(urlStr, headers = {}, options = {}, initialRedire
 
       req.on('error', (err) => reject(formatNetworkError(err)));
       req.setTimeout(timeoutMs, () => req.destroy(new Error('Probe timeout')));
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          req.destroy(new Error('Aborted'));
+          return reject(new Error('Aborted'));
+        }
+        options.signal.addEventListener('abort', () => {
+          req.destroy(new Error('Aborted'));
+          reject(new Error('Aborted'));
+        }, { once: true });
+      }
+
       req.end();
     });
 
@@ -424,8 +448,19 @@ export class DownloadTask extends EventEmitter {
     this.url = options.url;
     this.finalUrl = options.finalUrl || options.url;
     this.targetDir = options.targetDir;
-    this.filename = sanitizeDownloadFilename(options.filename || '');
-    this.targetPath = options.targetPath || '';
+    let cleanName = sanitizeDownloadFilename(options.filename || '');
+    if (!cleanName && options.url) {
+      try {
+        const u = new URL(options.url);
+        const base = path.basename(u.pathname);
+        if (base && base !== '/' && base !== '.') {
+          cleanName = sanitizeDownloadFilename(decodeURIComponent(base));
+        }
+      } catch {}
+    }
+    this.filename = cleanName || ('download_' + Date.now());
+    this.category = options.category || getCategoryByFilename(this.filename);
+    this.targetPath = options.targetPath || (this.targetDir ? path.join(this.targetDir, this.filename) : '');
     this.totalBytes = options.totalBytes || 0;
     this.downloadedBytes = options.downloadedBytes || 0;
     this.status = options.status || 'pending'; // 'pending' | 'connecting' | 'downloading' | 'paused' | 'merging' | 'completed' | 'error' | 'cancelled'
@@ -437,7 +472,6 @@ export class DownloadTask extends EventEmitter {
     this.speed = 0;
     this.timeLeft = null;
     this.error = options.error || null;
-    this.category = options.category || 'general';
     this.addedAt = options.addedAt || new Date().toISOString();
     this.completedAt = options.completedAt || null;
 
@@ -504,24 +538,62 @@ export class DownloadTask extends EventEmitter {
   }
 
   async init() {
+    if (this._initPromise) return this._initPromise;
+    this._initPromise = this._runInit();
+    try {
+      return await this._initPromise;
+    } finally {
+      this._initPromise = null;
+    }
+  }
+
+  async _runInit() {
     this.status = 'connecting';
     this.error = null;
     this.emit('update', this.toJSON());
 
-    try {
-      const probe = await probeUrl(this.url, {}, {
-        timeoutMs: this.requestTimeoutMs,
-        tlsOptions: this.tlsOptions
-      });
-      this.finalUrl = probe.finalUrl;
-      this.totalBytes = probe.contentLength;
-      this.resumable = probe.acceptRanges;
-      this.etag = probe.etag || this.etag;
-      this.lastModified = probe.lastModified || this.lastModified;
+    const initAbortCtrl = new AbortController();
+    this._abortControllers.add(initAbortCtrl);
 
-      if (!this.filename) {
-        this.filename = sanitizeDownloadFilename(probe.filename) || ('download_' + Date.now());
+    try {
+      let probe = null;
+      try {
+        probe = await probeUrl(this.url, {}, {
+          timeoutMs: Math.min(this.requestTimeoutMs || 12000, 6000),
+          tlsOptions: this.tlsOptions,
+          signal: initAbortCtrl.signal
+        });
+      } catch (probeErr) {
+        if (probeErr.isFatal) throw probeErr;
+        // Non-fatal probe failure: graceful fallback to single stream with runtime length
+      } finally {
+        this._abortControllers.delete(initAbortCtrl);
       }
+
+      if (this._isPaused || this._isCancelled) return this;
+
+      if (probe) {
+        this.finalUrl = probe.finalUrl;
+        this.totalBytes = probe.contentLength || 0;
+        this.resumable = probe.acceptRanges;
+        this.etag = probe.etag || this.etag;
+        this.lastModified = probe.lastModified || this.lastModified;
+
+        if (!this.filename) {
+          this.filename = sanitizeDownloadFilename(probe.filename) || ('download_' + Date.now());
+        }
+      } else {
+        this.totalBytes = 0;
+        this.resumable = false;
+        if (!this.filename) {
+          try {
+            const base = path.basename(new URL(this.url).pathname);
+            if (base && base !== '/' && base !== '.') this.filename = sanitizeDownloadFilename(decodeURIComponent(base));
+          } catch {}
+          if (!this.filename) this.filename = 'download_' + Date.now();
+        }
+      }
+
       this.category = getCategoryByFilename(this.filename);
 
       if (this.autoCategorize && this.category) {
@@ -562,6 +634,8 @@ export class DownloadTask extends EventEmitter {
       }
       this.emit('update', this.toJSON());
       throw err;
+    } finally {
+      this._abortControllers.delete(initAbortCtrl);
     }
   }
 
@@ -1467,10 +1541,20 @@ export class DownloadTask extends EventEmitter {
     this._stopSpeedMonitor();
 
     if (this._activeStreamPromises.size > 0) {
-      await Promise.allSettled(Array.from(this._activeStreamPromises));
+      try {
+        await Promise.race([
+          Promise.allSettled(Array.from(this._activeStreamPromises)),
+          sleep(600)
+        ]);
+      } catch {}
     }
     if (this._activeRunPromise) {
-      try { await this._activeRunPromise; } catch {}
+      try {
+        await Promise.race([
+          this._activeRunPromise,
+          sleep(600)
+        ]);
+      } catch {}
     }
 
     if (deleteTemp) {

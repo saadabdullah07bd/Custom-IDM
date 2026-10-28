@@ -100,6 +100,8 @@ export function generateTestCertificate({ expired = false } = {}) {
     asn1UtcTime(new Date(now + 365 * 86400 * 1000))
   );
 
+  const caKeyId = crypto.createHash('sha1').update(caKeys.publicKey).digest();
+
   // BasicConstraints: CA:TRUE (critical)
   const bcCaExt = asn1Sequence(
     asn1Oid([0x55, 0x1d, 0x13]),
@@ -112,6 +114,11 @@ export function generateTestCertificate({ expired = false } = {}) {
     Buffer.from([0x01, 0x01, 0xff]),
     asn1OctetString(Buffer.from([0x03, 0x02, 0x01, 0x06]))
   );
+  // SubjectKeyIdentifier: OID 2.5.29.14
+  const skiCaExt = asn1Sequence(
+    asn1Oid([0x55, 0x1d, 0x0e]),
+    asn1OctetString(asn1OctetString(caKeyId))
+  );
 
   const caTbs = asn1Sequence(
     asn1Tag(0xa0, asn1Integer(2)),
@@ -121,7 +128,7 @@ export function generateTestCertificate({ expired = false } = {}) {
     caValidity,
     caName,
     caKeys.publicKey,
-    asn1Tag(0xa3, asn1Sequence(bcCaExt, kuCaExt))
+    asn1Tag(0xa3, asn1Sequence(bcCaExt, kuCaExt, skiCaExt))
   );
   const caSig = crypto.sign('sha256', caTbs, caKeys.privateKey);
   const caCertPem = derToPem(asn1Sequence(caTbs, sigAlg, asn1BitString(caSig)));
@@ -152,6 +159,12 @@ export function generateTestCertificate({ expired = false } = {}) {
     asn1OctetString(asn1Sequence(dnsName, ipAddr))
   );
 
+  // AuthorityKeyIdentifier: OID 2.5.29.35
+  const akiLeafExt = asn1Sequence(
+    asn1Oid([0x55, 0x1d, 0x23]),
+    asn1OctetString(asn1Sequence(asn1Tag(0x80, caKeyId)))
+  );
+
   const leafTbs = asn1Sequence(
     asn1Tag(0xa0, asn1Integer(2)),
     asn1Integer(crypto.randomBytes(8)),
@@ -160,7 +173,7 @@ export function generateTestCertificate({ expired = false } = {}) {
     leafValidity,
     leafName,
     leafKeys.publicKey,
-    asn1Tag(0xa3, asn1Sequence(bcLeafExt, sanExt))
+    asn1Tag(0xa3, asn1Sequence(bcLeafExt, sanExt, akiLeafExt))
   );
   const leafSig = crypto.sign('sha256', leafTbs, caKeys.privateKey);
   const leafCertPem = derToPem(asn1Sequence(leafTbs, sigAlg, asn1BitString(leafSig)));

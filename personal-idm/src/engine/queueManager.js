@@ -270,16 +270,22 @@ export class QueueManager extends EventEmitter {
     this._bindTaskEvents(task);
     this.tasks.set(task.id, task);
     this.saveTasks();
-    this.emit('task-added', task.toJSON());
-
-    await task.init();
-
     if (options.autoStart !== false) {
+      this.emit('task-added', task.toJSON());
+      await task.init();
       this.startTask(task.id);
     } else {
       task.status = 'pending';
       this.saveTasks();
-      this.emit('task-updated', task.toJSON());
+      this.emit('task-added', task.toJSON());
+      // Non-blocking background probe for permission popup & instant bridge response
+      task.init().then(() => {
+        task.status = 'pending';
+        this.saveTasks();
+        this.emit('task-updated', task.toJSON());
+      }).catch((err) => {
+        console.warn(`[QueueManager] Background probe failed for task ${task.id}:`, err.message);
+      });
     }
 
     return task.toJSON();

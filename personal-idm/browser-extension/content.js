@@ -1,63 +1,142 @@
-// Personal IDM Browser Content Script — In-Page Download Panel & Permission Prompt
+// Personal IDM Browser Content Script — Modern Video Downloader Widget
 
 (function () {
   if (window.__personal_idm_injected__) return;
   window.__personal_idm_injected__ = true;
 
-  const DOWNLOAD_EXTS = [
-    '.zip', '.rar', '.7z', '.tar', '.gz', '.iso', '.exe', '.msi', '.apk',
-    '.mp4', '.mkv', '.avi', '.mov', '.mp3', '.flac', '.pdf', '.dmg', '.deb'
-  ];
-
-  function isDownloadableUrl(url) {
-    if (!url || typeof url !== 'string') return false;
-    try {
-      const parsed = new URL(url, location.href);
-      const pathname = parsed.pathname.toLowerCase();
-      return DOWNLOAD_EXTS.some(ext => pathname.endsWith(ext));
-    } catch {
-      return false;
-    }
-  }
-
-  function getFilenameFromUrl(url) {
-    try {
-      const parsed = new URL(url, location.href);
-      const name = parsed.pathname.split('/').pop() || 'download';
-      return decodeURIComponent(name);
-    } catch {
-      return 'download';
-    }
-  }
-
-  // Floating Video/Audio Download Button
   let floatingBtn = null;
-  function createFloatingButton() {
-    if (floatingBtn) return floatingBtn;
-    floatingBtn = document.createElement('div');
-    floatingBtn.id = 'personal-idm-video-btn';
+  let activeMediaEl = null;
+  let hideTimeout = null;
+
+  function isFullscreenActive() {
+    return Boolean(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement ||
+      (window.innerWidth === screen.width && window.innerHeight === screen.height)
+    );
+  }
+
+  function updateFullscreenClass() {
+    if (isFullscreenActive()) {
+      document.documentElement.classList.add('idm-is-fullscreen');
+      document.body.classList.add('idm-is-fullscreen');
+      hideFloatingButton();
+    } else {
+      document.documentElement.classList.remove('idm-is-fullscreen');
+      document.body.classList.remove('idm-is-fullscreen');
+    }
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenClass);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenClass);
+  document.addEventListener('mozfullscreenchange', updateFullscreenClass);
+  window.addEventListener('resize', updateFullscreenClass);
+
+  function resetBtnContent() {
+    if (!floatingBtn) return;
+    floatingBtn.classList.remove('loading');
     floatingBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      <span>Download with IDM</span>
+      <span>Download this video</span>
     `;
+  }
+
+  function createFloatingButton() {
+    if (floatingBtn) return floatingBtn;
+    floatingBtn = document.createElement('div');
+    floatingBtn.id = 'personal-idm-video-btn';
+    resetBtnContent();
+
+    floatingBtn.addEventListener('mouseenter', () => {
+      if (hideTimeout) clearTimeout(hideTimeout);
+    });
+
+    floatingBtn.addEventListener('mouseleave', () => {
+      scheduleHide();
+    });
+
+    floatingBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!activeMediaEl) return;
+
+      let src = activeMediaEl.currentSrc || activeMediaEl.src;
+      if (!src || src.startsWith('blob:') || src.startsWith('mediasource:')) {
+        const sourceTag = activeMediaEl.querySelector('source[src]');
+        if (sourceTag && sourceTag.src) src = sourceTag.src;
+      }
+      if (!src) {
+        src = window.location.href;
+      }
+
+      let filename = '';
+      try {
+        const cleanTitle = (document.title || '').replace(/[^\w\s.-]/g, '').trim();
+        filename = cleanTitle ? `${cleanTitle}.mp4` : 'video.mp4';
+      } catch {
+        filename = 'video.mp4';
+      }
+
+      floatingBtn.classList.add('loading');
+      floatingBtn.innerHTML = `
+        <svg class="idm-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor"></path>
+        </svg>
+        <span>Sending to IDM...</span>
+      `;
+
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({
+          type: 'DOWNLOAD_WITH_IDM',
+          url: src,
+          filename
+        }, () => {
+          setTimeout(() => {
+            resetBtnContent();
+            hideFloatingButton();
+          }, 700);
+        });
+      }
+    });
+
     document.body.appendChild(floatingBtn);
     return floatingBtn;
   }
 
-  let activeMediaEl = null;
   function showFloatingButtonFor(el) {
-    const btn = createFloatingButton();
-    activeMediaEl = el;
-    const rect = el.getBoundingClientRect();
-    if (rect.width < 50 || rect.height < 50) return;
+    if (isFullscreenActive()) return;
 
-    btn.style.top = `${window.scrollY + rect.top + 8}px`;
-    btn.style.left = `${window.scrollX + rect.right - 150}px`;
+    activeMediaEl = el;
+    const btn = createFloatingButton();
+    const rect = el.getBoundingClientRect();
+
+    // Ignore tiny media elements (audio indicators, trackers)
+    if (rect.width < 100 || rect.height < 60) return;
+
+    if (hideTimeout) clearTimeout(hideTimeout);
+
+    const btnWidth = 145;
+    const topPos = Math.max(10, window.scrollY + rect.top + 10);
+    const leftPos = Math.max(10, window.scrollX + rect.right - btnWidth - 14);
+
+    btn.style.top = `${topPos}px`;
+    btn.style.left = `${leftPos}px`;
     btn.classList.add('visible');
+  }
+
+  function scheduleHide() {
+    if (hideTimeout) clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      hideFloatingButton();
+    }, 400);
   }
 
   function hideFloatingButton() {
@@ -67,85 +146,19 @@
     activeMediaEl = null;
   }
 
-  // Media hover listeners
+  // Hover detection over media elements
   document.addEventListener('mouseover', (e) => {
+    if (isFullscreenActive()) return;
     const target = e.target;
     if (target && (target.tagName === 'VIDEO' || target.tagName === 'AUDIO')) {
       showFloatingButtonFor(target);
     }
   }, true);
 
-  document.addEventListener('click', (e) => {
-    if (floatingBtn && floatingBtn.contains(e.target) && activeMediaEl) {
-      e.preventDefault();
-      e.stopPropagation();
-      const mediaSrc = activeMediaEl.currentSrc || activeMediaEl.src;
-      if (mediaSrc) {
-        showConfirmationModal(mediaSrc, getFilenameFromUrl(mediaSrc));
-      }
-      hideFloatingButton();
-    }
-  }, true);
-
-  // In-Page Permission / Confirmation Modal
-  let confirmModal = null;
-  function showConfirmationModal(url, filename = '') {
-    if (!confirmModal) {
-      confirmModal = document.createElement('div');
-      confirmModal.id = 'personal-idm-confirm-dialog';
-      document.body.appendChild(confirmModal);
-    }
-
-    const cleanFn = filename || getFilenameFromUrl(url);
-
-    confirmModal.innerHTML = `
-      <div class="idm-confirm-box">
-        <div class="idm-confirm-header">
-          <span class="idm-confirm-title">Download with Personal IDM</span>
-          <button class="idm-confirm-close" id="idmBtnCancelX">✕</button>
-        </div>
-        <div class="idm-confirm-body">
-          <div class="idm-confirm-file">
-            <span class="idm-confirm-fn" title="${cleanFn}">${cleanFn}</span>
-            <span class="idm-confirm-url" title="${url}">${url}</span>
-          </div>
-          <div class="idm-confirm-msg">Start this accelerated multi-part download now?</div>
-        </div>
-        <div class="idm-confirm-footer">
-          <button class="idm-btn idm-btn-cancel" id="idmBtnCancel">Cancel</button>
-          <button class="idm-btn idm-btn-primary" id="idmBtnDownload">Download Now</button>
-        </div>
-      </div>
-    `;
-
-    confirmModal.classList.add('open');
-
-    const close = () => confirmModal.classList.remove('open');
-    document.getElementById('idmBtnCancelX')?.addEventListener('click', close);
-    document.getElementById('idmBtnCancel')?.addEventListener('click', close);
-
-    document.getElementById('idmBtnDownload')?.addEventListener('click', () => {
-      close();
-      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-        chrome.runtime.sendMessage({
-          type: 'DOWNLOAD_WITH_IDM',
-          url,
-          filename: cleanFn
-        });
-      }
-    });
-  }
-
-  // Intercept clicks on downloadable links
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (!link || !link.href) return;
-
-    if (isDownloadableUrl(link.href)) {
-      e.preventDefault();
-      e.stopPropagation();
-      const fn = link.getAttribute('download') || getFilenameFromUrl(link.href);
-      showConfirmationModal(link.href, fn);
+  document.addEventListener('mouseout', (e) => {
+    const target = e.target;
+    if (target && (target.tagName === 'VIDEO' || target.tagName === 'AUDIO')) {
+      scheduleHide();
     }
   }, true);
 

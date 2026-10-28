@@ -60,6 +60,7 @@ function openDownloadInfoWindow(taskId) {
     frame: false,
     titleBarStyle: 'hidden',
     resizable: true,
+    show: false,
     backgroundColor: '#090d16',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -72,6 +73,13 @@ function openDownloadInfoWindow(taskId) {
   win.loadFile(path.join(__dirname, '../renderer/download-info.html'), {
     search: `?taskId=${encodeURIComponent(taskId)}`,
     hash: taskId
+  });
+
+  win.once('ready-to-show', () => {
+    win.show();
+    win.focus();
+    win.setAlwaysOnTop(true);
+    win.setAlwaysOnTop(false);
   });
 
   downloadInfoWindows.set(taskId, win);
@@ -197,6 +205,7 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
     titleBarStyle: 'hidden',
     title: task ? `${task.filename || 'Download'} - Internet Download Manager` : 'Download Progress',
     resizable: true,
+    show: false,
     backgroundColor: '#090d16',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -209,6 +218,13 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
   win.loadFile(path.join(__dirname, '../renderer/progress.html'), {
     search: `?taskId=${encodeURIComponent(taskId)}`,
     hash: taskId
+  });
+
+  win.once('ready-to-show', () => {
+    win.show();
+    win.focus();
+    win.setAlwaysOnTop(true);
+    win.setAlwaysOnTop(false);
   });
 
   progressWindows.set(taskId, win);

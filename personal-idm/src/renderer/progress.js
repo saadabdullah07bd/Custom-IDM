@@ -140,8 +140,12 @@ async function init() {
     }
   });
 
-  document.getElementById('btnCancel').addEventListener('click', () => {
-    if (currentTask) window.api.pauseDownload(currentTask.id);
+  document.getElementById('btnCancel').addEventListener('click', async () => {
+    if (currentTask) {
+      try {
+        await window.api.deleteDownload(currentTask.id, false, false);
+      } catch {}
+    }
     window.close();
   });
 
