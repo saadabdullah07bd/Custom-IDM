@@ -139,6 +139,32 @@ export function getCategoryByFilename(filename) {
   return 'general';
 }
 
+/**
+ * Returns human-readable category folder matching IDM
+ */
+export function getCategoryFolderName(category) {
+  switch (category) {
+    case 'compressed': return 'Compressed';
+    case 'documents': return 'Documents';
+    case 'music': return 'Music';
+    case 'programs': return 'Programs';
+    case 'video': return 'Video';
+    default: return 'General';
+  }
+}
+
+/**
+ * Dynamically determines optimal thread count based on payload size & range support
+ */
+export function calculateOptimalConnections(totalBytes, resumable = true) {
+  if (!resumable || !totalBytes || totalBytes <= 0) return 1;
+  if (totalBytes < 1024 * 1024) return 1;             // < 1 MB: 1 connection
+  if (totalBytes < 10 * 1024 * 1024) return 4;        // 1 - 10 MB: 4 connections
+  if (totalBytes < 100 * 1024 * 1024) return 8;       // 10 - 100 MB: 8 connections
+  if (totalBytes < 500 * 1024 * 1024) return 16;      // 100 - 500 MB: 16 connections
+  return 32;                                          // > 500 MB: 32 connections
+}
+
 function formatNetworkError(err) {
   if (!err) return new Error('Unknown network error');
   const code = err.code || '';
@@ -404,7 +430,9 @@ export class DownloadTask extends EventEmitter {
     this.downloadedBytes = options.downloadedBytes || 0;
     this.status = options.status || 'pending'; // 'pending' | 'connecting' | 'downloading' | 'paused' | 'merging' | 'completed' | 'error' | 'cancelled'
     this.resumable = options.resumable !== undefined ? options.resumable : false;
-    this.maxConnections = Math.min(32, Math.max(1, parseInt(options.maxConnections, 10) || 8));
+    this.isDynamicConnections = (!options.maxConnections || options.maxConnections === 'auto');
+    this.maxConnections = this.isDynamicConnections ? 8 : Math.min(32, Math.max(1, parseInt(options.maxConnections, 10) || 8));
+    this.autoCategorize = Boolean(options.autoCategorize);
     this.segments = Array.isArray(options.segments) ? options.segments.map(s => ({ ...s, ownerWorkerId: null })) : [];
     this.speed = 0;
     this.timeLeft = null;
@@ -495,6 +523,18 @@ export class DownloadTask extends EventEmitter {
         this.filename = sanitizeDownloadFilename(probe.filename) || ('download_' + Date.now());
       }
       this.category = getCategoryByFilename(this.filename);
+
+      if (this.autoCategorize && this.category) {
+        const catFolder = getCategoryFolderName(this.category);
+        if (!this.targetDir.endsWith(catFolder) && !this.targetDir.endsWith(catFolder.toLowerCase())) {
+          this.targetDir = path.join(this.targetDir, catFolder);
+        }
+      }
+
+      if (this.isDynamicConnections) {
+        this.maxConnections = calculateOptimalConnections(this.totalBytes, this.resumable);
+        this._activeConcurrencyLimit = this.maxConnections;
+      }
 
       if (!fs.existsSync(this.targetDir)) {
         fs.mkdirSync(this.targetDir, { recursive: true });

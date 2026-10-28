@@ -253,6 +253,7 @@ export class QueueManager extends EventEmitter {
       targetDir: options.targetDir || this.defaultDownloadDir,
       filename: options.filename,
       maxConnections: options.maxConnections || this.defaultConnections,
+      autoCategorize: options.autoCategorize,
       expectedSha256: options.expectedSha256,
       conflictPolicy: options.conflictPolicy || 'rename',
       maxRetries: options.maxRetries,

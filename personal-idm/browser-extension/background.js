@@ -178,11 +178,14 @@ export async function sendToPersonalIDM(url, filename = '', options = {}) {
 }
 
 function notify(title, message) {
-  if (typeof chrome !== 'undefined' && chrome.notifications) {
+  if (typeof chrome !== 'undefined' && chrome.notifications && chrome.notifications.create) {
     try {
+      const iconUrl = (typeof chrome.runtime !== 'undefined' && chrome.runtime.getURL)
+        ? chrome.runtime.getURL('images/logo48.png')
+        : 'images/logo48.png';
       chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMjg0YzciIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB5MT0iMTUiIHgyPSIxMiIgeTI9IjMiLz48L3N2Zz4=',
+        iconUrl,
         title,
         message
       });
@@ -190,7 +193,7 @@ function notify(title, message) {
   }
 }
 
-// Register browser listeners only when running inside Chrome/Edge extension environment
+// Register browser listeners only when running inside Chrome/Firefox/Edge extension environment
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalled) {
   chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
@@ -210,6 +213,16 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalle
     const targetUrl = info.linkUrl || info.srcUrl || info.pageUrl;
     if (!targetUrl) return;
     sendToPersonalIDM(targetUrl);
+  });
+
+  // Handle messages from content script
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message && message.type === 'DOWNLOAD_WITH_IDM' && message.url) {
+      sendToPersonalIDM(message.url, message.filename || '')
+        .then((ok) => sendResponse({ success: ok }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true; // Keep message channel open for async response
+    }
   });
 
   chrome.downloads.onCreated.addListener(async (downloadItem) => {

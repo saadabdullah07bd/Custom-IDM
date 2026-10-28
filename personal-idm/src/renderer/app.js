@@ -1,5 +1,4 @@
-// Personal IDM — Native Windows 11 Fluent Desktop Renderer Logic
-// Pairs with Electron main process, multi-segment download engine & loopback bridge
+// Personal IDM — Modern Minimalist Desktop Renderer Logic
 
 const state = {
   tasks: new Map(),
@@ -11,7 +10,6 @@ const state = {
   sortAsc: false,
   currentDetailsTaskId: null,
   defaultDir: '',
-  autoShowPopup: true,
   settings: {
     defaultDownloadDir: '',
     defaultConnections: 8,
@@ -23,13 +21,6 @@ const state = {
 
 // DOM Elements
 const tableBody = document.getElementById('downloadsTableBody');
-const sbTaskCount = document.getElementById('sbTaskCount');
-const sbSpeed = document.getElementById('sbSpeed');
-const sbPortStatus = document.getElementById('sbPortStatus');
-const sbDefaultDir = document.getElementById('sbDefaultDir');
-const activeFilterSummary = document.getElementById('activeFilterSummary');
-
-// Category counts
 const countAll = document.getElementById('countAll');
 const countCompressed = document.getElementById('countCompressed');
 const countDocuments = document.getElementById('countDocuments');
@@ -47,25 +38,24 @@ const schedulerDialogModal = document.getElementById('schedulerDialogModal');
 const grabberDialogModal = document.getElementById('grabberDialogModal');
 const aboutDialogModal = document.getElementById('aboutDialogModal');
 
+// Sidebar
+const mainContent = document.getElementById('idmMainContent');
+const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+const btnCollapseSidebar = document.getElementById('btnCollapseSidebar');
+
 // ========================================================
-// FORMAT HELPERS MATCHING IDM EXACT SPECIFICATION
+// FORMAT HELPERS
 // ========================================================
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return '0.00 KB';
-  if (bytes < 1024 * 1024) {
-    return (bytes / 1024).toFixed(2) + ' KB';
-  }
-  if (bytes < 1024 * 1024 * 1024) {
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  }
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
 }
 
 function formatSpeed(bytesPerSec) {
   if (!bytesPerSec || bytesPerSec <= 0) return '0.00 KB/sec';
-  if (bytesPerSec < 1024 * 1024) {
-    return (bytesPerSec / 1024).toFixed(2) + ' KB/sec';
-  }
+  if (bytesPerSec < 1024 * 1024) return (bytesPerSec / 1024).toFixed(2) + ' KB/sec';
   return (bytesPerSec / (1024 * 1024)).toFixed(3) + ' MB/sec';
 }
 
@@ -95,14 +85,14 @@ function getFileBadgeText(cat, filename = '') {
   }
 }
 
-function getFileIconClass(cat) {
+function getCategoryFolderName(cat) {
   switch (cat) {
-    case 'compressed': return 'icon-zip';
-    case 'programs': return 'icon-exe';
-    case 'documents': return 'icon-doc';
-    case 'video': return 'icon-video';
-    case 'music': return 'icon-music';
-    default: return 'icon-doc';
+    case 'compressed': return 'Compressed';
+    case 'documents': return 'Documents';
+    case 'music': return 'Music';
+    case 'programs': return 'Programs';
+    case 'video': return 'Video';
+    default: return 'General';
   }
 }
 
@@ -115,22 +105,19 @@ function getActiveOrSelectedTaskId() {
       return id;
     }
   }
-  const first = state.tasks.keys().next().value;
-  return first || null;
+  return state.tasks.keys().next().value || null;
 }
 
 function applySettingsToUI(settings) {
   state.settings = { ...state.settings, ...settings };
   state.defaultDir = state.settings.defaultDownloadDir;
 
-  if (sbDefaultDir) sbDefaultDir.textContent = `Save to: ${state.defaultDir}`;
-  const savePathInput = document.getElementById('savePathInput');
-  if (savePathInput) savePathInput.value = state.defaultDir;
   const optSaveDir = document.getElementById('optSaveDir');
   if (optSaveDir) optSaveDir.value = state.defaultDir;
-  
-  const selectThreads = document.getElementById('selectThreads');
-  if (selectThreads) selectThreads.value = String(state.settings.defaultConnections);
+
+  const savePathInput = document.getElementById('savePathInput');
+  if (savePathInput && !savePathInput.value) savePathInput.value = state.defaultDir;
+
   const optDefaultConn = document.getElementById('optDefaultConn');
   if (optDefaultConn) optDefaultConn.value = String(state.settings.defaultConnections);
 
@@ -139,28 +126,30 @@ function applySettingsToUI(settings) {
 
   const speedLimEl = document.getElementById('optSpeedLimit');
   if (speedLimEl) speedLimEl.value = String(state.settings.speedLimitKbps || 0);
-
-  const autoPopupEl = document.getElementById('optAutoShowPopup');
-  if (autoPopupEl) autoPopupEl.checked = state.autoShowPopup;
 }
 
 // ========================================================
 // INITIALIZATION
 // ========================================================
 async function init() {
-  // Theme initialization (Native Windows 11: clean light default with dark support)
   const savedTheme = localStorage.getItem('personal-idm-theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
-  const themeToggleBtn = document.getElementById('themeToggleBtn');
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', toggleTheme);
+  const themeSelect = document.getElementById('optThemeSelect');
+  if (themeSelect) themeSelect.value = savedTheme;
+
+  // Restore sidebar state
+  const isSidebarCollapsed = localStorage.getItem('personal-idm-sidebar-collapsed') === 'true';
+  if (isSidebarCollapsed && mainContent) {
+    mainContent.classList.add('sidebar-collapsed');
   }
 
-  // Auto popup preference
-  const savedAutoPopup = localStorage.getItem('personal-idm-auto-popup');
-  if (savedAutoPopup !== null) {
-    state.autoShowPopup = savedAutoPopup !== 'false';
+  // Sidebar togglers
+  if (btnToggleSidebar) {
+    btnToggleSidebar.addEventListener('click', toggleSidebar);
+  }
+  if (btnCollapseSidebar) {
+    btnCollapseSidebar.addEventListener('click', toggleSidebar);
   }
 
   const settings = await window.api.getSettings();
@@ -169,7 +158,6 @@ async function init() {
   const port = await window.api.getServerPort();
   const portLbl = document.getElementById('optActivePortLabel');
   if (portLbl) portLbl.textContent = `127.0.0.1:${port}`;
-  if (sbPortStatus) sbPortStatus.textContent = `Bridge: 127.0.0.1:${port}`;
 
   const tasks = await window.api.getTasks();
   for (const t of tasks) {
@@ -179,21 +167,19 @@ async function init() {
   updateSortIndicators();
   renderTable();
   updateCategoryCounts();
-  setupMenubar();
   setupToolbarEvents();
   setupFilterAndSortEvents();
   setupIPCListeners();
 }
 
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('personal-idm-theme', next);
+function toggleSidebar() {
+  if (!mainContent) return;
+  const isCollapsed = mainContent.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('personal-idm-sidebar-collapsed', String(isCollapsed));
 }
 
 // ========================================================
-// TABLE & STATUS CELL RENDERING
+// TABLE & STATUS RENDERING
 // ========================================================
 function renderStatusCellHtml(task) {
   if (task.status === 'downloading' || task.status === 'connecting') {
@@ -232,11 +218,11 @@ function getFilteredAndSortedTasks() {
 
   const filtered = allTasks.filter(task => {
     // 1. Category tree filter
-    if (state.activeCategory === 'unfinished' || state.activeCategory === 'sync-queue') {
+    if (state.activeCategory === 'unfinished') {
       if (task.status === 'completed') return false;
     } else if (state.activeCategory === 'finished') {
       if (task.status !== 'completed') return false;
-    } else if (state.activeCategory !== 'all' && state.activeCategory !== 'queue' && state.activeCategory !== 'main-queue') {
+    } else if (state.activeCategory !== 'all') {
       if (task.category !== state.activeCategory) return false;
     }
 
@@ -296,18 +282,7 @@ function updateSortIndicators() {
 
 function renderTable() {
   const filtered = getFilteredAndSortedTasks();
-  const totalCount = state.tasks.size;
-
   tableBody.innerHTML = '';
-  if (sbTaskCount) sbTaskCount.textContent = `${filtered.length} of ${totalCount} downloads`;
-
-  if (activeFilterSummary) {
-    const parts = [];
-    if (state.activeCategory !== 'all') parts.push(`Category: ${state.activeCategory}`);
-    if (state.statusFilter !== 'all') parts.push(`Status: ${state.statusFilter}`);
-    if (state.searchQuery.trim()) parts.push(`Search: "${state.searchQuery.trim()}"`);
-    activeFilterSummary.textContent = parts.length > 0 ? parts.join(' | ') : `Showing all (${filtered.length})`;
-  }
 
   if (filtered.length === 0) {
     const emptyTr = document.createElement('tr');
@@ -317,12 +292,11 @@ function renderTable() {
       <td colspan="7">
         <div class="empty-state-box">
           <div class="empty-state-title">${hasFilters ? 'No downloads match the current filter' : 'Download queue is empty'}</div>
-          <div class="empty-state-sub">${hasFilters ? 'Try clearing the search box or switching categories on the left.' : 'Click "Add URL" on the toolbar or use the Browser Extension to start an accelerated multi-part download.'}</div>
+          <div class="empty-state-sub">${hasFilters ? 'Try clearing the search box or switching categories on the left.' : 'Click "Add URL" on the toolbar or use the Browser Extension to start downloading.'}</div>
         </div>
       </td>
     `;
     tableBody.appendChild(emptyTr);
-    updateTotalSpeed();
     return;
   }
 
@@ -342,7 +316,7 @@ function renderTable() {
     tr.innerHTML = `
       <td>
         <div class="cell-file">
-          <span class="file-type-icon ${getFileIconClass(task.category)}">${getFileBadgeText(task.category, task.filename)}</span>
+          <span class="file-type-icon">${getFileBadgeText(task.category, task.filename)}</span>
           <span title="${task.filename || ''}">${task.filename || 'Initializing...'}</span>
         </div>
       </td>
@@ -356,8 +330,6 @@ function renderTable() {
 
     tableBody.appendChild(tr);
   }
-
-  updateTotalSpeed();
 }
 
 function updateTableRow(task) {
@@ -398,39 +370,36 @@ function updateCategoryCounts() {
   if (countFinished) countFinished.textContent = allTasks.filter(t => t.status === 'completed').length;
 }
 
-function updateTotalSpeed() {
-  let total = 0;
-  for (const t of state.tasks.values()) {
-    if (t.status === 'downloading') total += (t.speed || 0);
-  }
-  const limitLabel = state.settings.speedLimitKbps > 0 ? ` (Cap: ${state.settings.speedLimitKbps} KB/s)` : '';
-  if (sbSpeed) sbSpeed.textContent = `Speed: ${formatSpeed(total)}${limitLabel}`;
-}
-
 // ========================================================
-// THE ICONIC IDM DOWNLOAD PROGRESS POPUP WINDOW LOGIC
+// DOWNLOAD STATUS WINDOW & MODAL
 // ========================================================
 function openDownloadStatus(id) {
   const task = state.tasks.get(id);
   if (!task) return;
 
+  // Open native separate BrowserWindow if available
+  if (window.api.openProgressWindow) {
+    window.api.openProgressWindow(id);
+  }
+
+  // Also update in-app modal
   state.currentDetailsTaskId = id;
   updateDownloadDialog(task);
-  downloadDialogModal.classList.add('open');
+  downloadDialogModal?.classList.add('open');
 }
 
 function updateDownloadDialog(task) {
-  const percent = task.percentage || 0;
+  const percent = Math.min(100, Math.max(0, task.percentage || 0));
   const dlgTitle = document.getElementById('dlgTitle');
-  if (dlgTitle) dlgTitle.textContent = `${percent}% of ${task.filename || 'file'} - Internet Download Manager`;
+  if (dlgTitle) dlgTitle.textContent = `${percent.toFixed(1)}% of ${task.filename || 'file'} - Internet Download Manager`;
 
   let statusDisplay = task.status;
   if (task.status === 'downloading') {
-    statusDisplay = task.retryCount > 0 ? `Receiving data... (Auto-retries: ${task.retryCount})` : 'Receiving data...';
+    statusDisplay = task.retryCount > 0 ? `Receiving data... (Retry #${task.retryCount})` : 'Receiving data...';
   } else if (task.status === 'connecting') {
     statusDisplay = 'Connecting to server...';
   } else if (task.status === 'merging') {
-    statusDisplay = 'Assembling parts & computing SHA-256...';
+    statusDisplay = 'Assembling file parts...';
   } else if (task.status === 'completed') {
     statusDisplay = 'Download complete';
   } else if (task.status === 'paused') {
@@ -446,7 +415,7 @@ function updateDownloadDialog(task) {
   if (dlgFileSize) dlgFileSize.textContent = formatBytes(task.totalBytes);
 
   const dlgDownloaded = document.getElementById('dlgDownloaded');
-  if (dlgDownloaded) dlgDownloaded.textContent = `${formatBytes(task.downloadedBytes)} (${percent.toFixed(2)}%)`;
+  if (dlgDownloaded) dlgDownloaded.textContent = `${formatBytes(task.downloadedBytes)} (${percent.toFixed(1)}%)`;
 
   const dlgTransferRate = document.getElementById('dlgTransferRate');
   if (dlgTransferRate) dlgTransferRate.textContent = task.status === 'downloading' ? formatSpeed(task.speed) : '0.00 KB/sec';
@@ -482,11 +451,10 @@ function updateDownloadDialog(task) {
     }
   }
 
-  // Segmented progress bar
   const pbar = document.getElementById('dlgProgressBar');
   const plbl = document.getElementById('dlgPercentLabel');
   if (pbar) pbar.style.width = `${percent}%`;
-  if (plbl) plbl.textContent = `${percent}%`;
+  if (plbl) plbl.textContent = `${percent.toFixed(1)}%`;
 
   // Pause / Resume button
   const pauseBtn = document.getElementById('dlgPauseResumeBtn');
@@ -506,264 +474,10 @@ function updateDownloadDialog(task) {
   if (openBtn) {
     openBtn.style.display = (task.status === 'completed') ? 'inline-block' : 'none';
   }
-
-  renderThreadSegments(task);
-}
-
-function getSegmentStateClass(segStatus) {
-  if (segStatus === 'completed') return 'lane-completed';
-  if (segStatus === 'error') return 'lane-error';
-  if (segStatus === 'pending') return 'lane-pending';
-  return 'lane-downloading';
-}
-
-function renderThreadSegments(task) {
-  const grid = document.getElementById('dlgSegmentsGrid');
-  const countLbl = document.getElementById('dlgConnCount');
-  if (!grid || !countLbl) return;
-
-  const segments = task.segments || [];
-  const activeCount = segments.filter(s => s.status === 'downloading').length;
-  countLbl.textContent = `${segments.length} segment(s) (${activeCount} active / max ${task.maxConnections})`;
-
-  if (grid.children.length === segments.length && segments.length > 0) {
-    segments.forEach((seg, i) => {
-      const row = grid.children[i];
-      const fill = row.querySelector('.thread-lane-fill');
-      const text = row.querySelector('.thread-lane-percent');
-      const p = seg.percentage || 0;
-      if (fill) {
-        fill.style.width = `${p}%`;
-        fill.className = `thread-lane-fill ${getSegmentStateClass(seg.status)}`;
-      }
-      if (text) text.textContent = `${p}%`;
-    });
-    return;
-  }
-
-  grid.innerHTML = '';
-  segments.forEach((seg, i) => {
-    const row = document.createElement('div');
-    row.className = 'thread-lane-row';
-    const p = seg.percentage || 0;
-    row.title = `Segment ${i + 1}: bytes ${seg.start}–${seg.end} (${seg.status})`;
-    row.innerHTML = `
-      <span class="thread-lane-tag">Seg ${i + 1}:</span>
-      <div class="thread-lane-bar-bg">
-        <div class="thread-lane-fill ${getSegmentStateClass(seg.status)}" style="width: ${p}%;"></div>
-      </div>
-      <span class="thread-lane-percent">${p}%</span>
-    `;
-    grid.appendChild(row);
-  });
 }
 
 // ========================================================
-// WORKING NATIVE WINDOWS MENUBAR CONTROLLER
-// ========================================================
-function setupMenubar() {
-  const menuList = [
-    { btnId: 'menuFile', dropdownId: 'dropdownFile' },
-    { btnId: 'menuTasks', dropdownId: 'dropdownTasks' },
-    { btnId: 'menuDownloads', dropdownId: 'dropdownDownloads' },
-    { btnId: 'menuTools', dropdownId: 'dropdownTools' },
-    { btnId: 'menuView', dropdownId: 'dropdownView' },
-    { btnId: 'menuHelp', dropdownId: 'dropdownHelp' }
-  ];
-
-  let activeMenuBtn = null;
-
-  function closeAllMenus() {
-    menuList.forEach(({ btnId, dropdownId }) => {
-      const btn = document.getElementById(btnId);
-      const dd = document.getElementById(dropdownId);
-      if (btn) {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-expanded', 'false');
-      }
-      if (dd) dd.classList.remove('show');
-    });
-    activeMenuBtn = null;
-  }
-
-  function openMenu(btn, dd) {
-    closeAllMenus();
-    btn.classList.add('active');
-    btn.setAttribute('aria-expanded', 'true');
-    dd.classList.add('show');
-    activeMenuBtn = btn;
-  }
-
-  menuList.forEach(({ btnId, dropdownId }) => {
-    const btn = document.getElementById(btnId);
-    const dd = document.getElementById(dropdownId);
-    if (!btn || !dd) return;
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (activeMenuBtn === btn) {
-        closeAllMenus();
-      } else {
-        openMenu(btn, dd);
-      }
-    });
-
-    btn.addEventListener('mouseenter', () => {
-      if (activeMenuBtn && activeMenuBtn !== btn) {
-        openMenu(btn, dd);
-      }
-    });
-  });
-
-  // Clicking outside closes open menus
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.menu-dropdown-wrapper')) {
-      closeAllMenus();
-    }
-  });
-
-  // Esc closes open menu
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && activeMenuBtn) {
-      closeAllMenus();
-    }
-  });
-
-  // Menu item click dispatcher
-  document.querySelectorAll('.menu-action').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeAllMenus();
-      handleMenuAction(item.id);
-    });
-  });
-}
-
-function handleMenuAction(actionId) {
-  switch (actionId) {
-    // File
-    case 'menuActionAddUrl':
-      openAddUrlDialog();
-      break;
-    case 'menuActionOpenFolder':
-      window.api.openFile(state.defaultDir);
-      break;
-    case 'menuActionExit':
-      window.close();
-      break;
-
-    // Tasks
-    case 'menuActionResume': {
-      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
-      if (id) window.api.resumeDownload(id);
-      break;
-    }
-    case 'menuActionStop': {
-      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
-      if (id) window.api.pauseDownload(id);
-      break;
-    }
-    case 'menuActionStopAll':
-      window.api.pauseAll();
-      break;
-    case 'menuActionDelete': {
-      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
-      if (id) {
-        const task = state.tasks.get(id);
-        if (confirm(`Delete "${task ? task.filename : 'download'}" and clean up temporary part files?`)) {
-          window.api.deleteDownload(id, false, false);
-        }
-      } else {
-        alert('Please select a download to delete.');
-      }
-      break;
-    }
-    case 'menuActionDeleteCompleted':
-      for (const task of state.tasks.values()) {
-        if (task.status === 'completed') {
-          window.api.deleteDownload(task.id, false, false);
-        }
-      }
-      break;
-
-    // Downloads
-    case 'menuActionShowStatus': {
-      const id = getActiveOrSelectedTaskId();
-      if (id) openDownloadStatus(id);
-      else alert('No active or selected download to show. Start a download first!');
-      break;
-    }
-    case 'menuActionStartQueue':
-      window.api.resumeAll();
-      break;
-    case 'menuActionStopQueue':
-      window.api.pauseAll();
-      break;
-    case 'menuActionSpeedLimit':
-      openOptionsModal('optTabConnBtn', 'optPaneConn');
-      break;
-
-    // Tools
-    case 'menuActionOptions':
-      openOptionsModal();
-      break;
-    case 'menuActionScheduler':
-      if (schedulerDialogModal) schedulerDialogModal.classList.add('open');
-      break;
-    case 'menuActionGrabber':
-      if (grabberDialogModal) grabberDialogModal.classList.add('open');
-      break;
-
-    // View
-    case 'menuActionToggleTheme':
-      toggleTheme();
-      break;
-    case 'menuActionFilterAll':
-      state.statusFilter = 'all';
-      state.activeCategory = 'all';
-      syncFiltersUI();
-      renderTable();
-      break;
-    case 'menuActionFilterDownloading':
-      state.statusFilter = 'downloading';
-      syncFiltersUI();
-      renderTable();
-      break;
-    case 'menuActionFilterCompleted':
-      state.statusFilter = 'completed';
-      syncFiltersUI();
-      renderTable();
-      break;
-    case 'menuActionResetFilters':
-      state.searchQuery = '';
-      state.statusFilter = 'all';
-      state.activeCategory = 'all';
-      syncFiltersUI();
-      renderTable();
-      break;
-
-    // Help
-    case 'menuActionAbout':
-      if (aboutDialogModal) aboutDialogModal.classList.add('open');
-      break;
-  }
-}
-
-function syncFiltersUI() {
-  const searchInput = document.getElementById('searchFilterInput');
-  const statusSelect = document.getElementById('statusFilterSelect');
-  if (searchInput) searchInput.value = state.searchQuery;
-  if (statusSelect) statusSelect.value = state.statusFilter;
-
-  document.querySelectorAll('.tree-item-row').forEach(row => {
-    const cat = row.getAttribute('data-cat');
-    if (cat === state.activeCategory) row.classList.add('selected');
-    else row.classList.remove('selected');
-  });
-}
-
-// ========================================================
-// FILTERING, SORTING & KEYBOARD SHORTCUTS
+// FILTERING & SHORTCUTS
 // ========================================================
 function setupFilterAndSortEvents() {
   const searchInput = document.getElementById('searchFilterInput');
@@ -830,42 +544,16 @@ function setupFilterAndSortEvents() {
       if (task && confirm(`Delete "${task.filename}" and clean up temporary part files?`)) {
         window.api.deleteDownload(state.selectedTaskId, false, false);
       }
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+      e.preventDefault();
+      toggleSidebar();
     }
   });
 }
 
 // ========================================================
-// TOOLBAR & DIALOG INTERACTION SETUP
+// TOOLBAR & DIALOGS
 // ========================================================
-async function openOptionsModal(activeTabBtnId = 'optTabGeneralBtn', activeTabPaneId = 'optPaneGeneral') {
-  const currentSettings = await window.api.getSettings();
-  applySettingsToUI(currentSettings);
-  const port = await window.api.getServerPort();
-  const portLbl = document.getElementById('optActivePortLabel');
-  if (portLbl) portLbl.textContent = `127.0.0.1:${port}`;
-
-  const optTabs = [
-    { btn: document.getElementById('optTabGeneralBtn'), pane: document.getElementById('optPaneGeneral') },
-    { btn: document.getElementById('optTabConnBtn'), pane: document.getElementById('optPaneConn') },
-    { btn: document.getElementById('optTabBridgeBtn'), pane: document.getElementById('optPaneBridge') }
-  ];
-  optTabs.forEach(({ btn, pane }) => {
-    if (!btn || !pane) return;
-    if (btn.id === activeTabBtnId) {
-      btn.classList.add('active');
-      pane.style.display = 'flex';
-    } else {
-      btn.classList.remove('active');
-      pane.style.display = 'none';
-    }
-  });
-
-  const autoPopupEl = document.getElementById('optAutoShowPopup');
-  if (autoPopupEl) autoPopupEl.checked = state.autoShowPopup;
-
-  optionsDialogModal.classList.add('open');
-}
-
 function setupToolbarEvents() {
   // Tree item selection
   document.querySelectorAll('.tree-item-row').forEach(row => {
@@ -880,27 +568,24 @@ function setupToolbarEvents() {
     });
   });
 
-  const rootCat = document.querySelector('.tree-item-row[data-cat="all"]');
-  if (rootCat) rootCat.classList.add('selected');
-
-  // Download Status Dialog Tabs
+  // Download Status Dialog Tabs — FIXED TAB SWITCHING SO LAYOUT NEVER COLLAPSES
   const tabBtnStatus = document.getElementById('tabBtnStatus');
   const tabBtnFileInfo = document.getElementById('tabBtnFileInfo');
   const tabPaneStatus = document.getElementById('tabPaneStatus');
   const tabPaneFileInfo = document.getElementById('tabPaneFileInfo');
 
-  if (tabBtnStatus && tabBtnFileInfo) {
+  if (tabBtnStatus && tabBtnFileInfo && tabPaneStatus && tabPaneFileInfo) {
     tabBtnStatus.addEventListener('click', () => {
       tabBtnStatus.classList.add('active');
       tabBtnFileInfo.classList.remove('active');
-      tabPaneStatus.style.display = 'flex';
+      tabPaneStatus.style.display = 'block';
       tabPaneFileInfo.style.display = 'none';
     });
     tabBtnFileInfo.addEventListener('click', () => {
       tabBtnFileInfo.classList.add('active');
       tabBtnStatus.classList.remove('active');
       tabPaneStatus.style.display = 'none';
-      tabPaneFileInfo.style.display = 'flex';
+      tabPaneFileInfo.style.display = 'block';
     });
   }
 
@@ -918,7 +603,7 @@ function setupToolbarEvents() {
         if (t.pane) t.pane.style.display = 'none';
       });
       btn.classList.add('active');
-      pane.style.display = 'flex';
+      pane.style.display = 'block';
     });
   });
 
@@ -965,15 +650,20 @@ function setupToolbarEvents() {
   });
 
   // Options Button & Dialog
-  document.getElementById('tbOptions').addEventListener('click', () => {
-    openOptionsModal();
+  document.getElementById('tbOptions').addEventListener('click', async () => {
+    const currentSettings = await window.api.getSettings();
+    applySettingsToUI(currentSettings);
+    const port = await window.api.getServerPort();
+    const portLbl = document.getElementById('optActivePortLabel');
+    if (portLbl) portLbl.textContent = `127.0.0.1:${port}`;
+    optionsDialogModal?.classList.add('open');
   });
 
   document.getElementById('optionsCloseBtn').addEventListener('click', () => {
-    optionsDialogModal.classList.remove('open');
+    optionsDialogModal?.classList.remove('open');
   });
   document.getElementById('optCancelBtn').addEventListener('click', () => {
-    optionsDialogModal.classList.remove('open');
+    optionsDialogModal?.classList.remove('open');
   });
 
   document.getElementById('optBrowseBtn').addEventListener('click', async () => {
@@ -983,10 +673,11 @@ function setupToolbarEvents() {
 
   document.getElementById('optSaveBtn').addEventListener('click', async () => {
     try {
-      const autoPopupEl = document.getElementById('optAutoShowPopup');
-      if (autoPopupEl) {
-        state.autoShowPopup = autoPopupEl.checked;
-        localStorage.setItem('personal-idm-auto-popup', String(state.autoShowPopup));
+      const themeSel = document.getElementById('optThemeSelect');
+      if (themeSel) {
+        const selectedTheme = themeSel.value;
+        document.documentElement.setAttribute('data-theme', selectedTheme);
+        localStorage.setItem('personal-idm-theme', selectedTheme);
       }
 
       const newSettings = {
@@ -997,8 +688,7 @@ function setupToolbarEvents() {
       };
       const saved = await window.api.saveSettings(newSettings);
       applySettingsToUI(saved);
-      updateTotalSpeed();
-      optionsDialogModal.classList.remove('open');
+      optionsDialogModal?.classList.remove('open');
     } catch (err) {
       alert('Invalid configuration: ' + err.message);
     }
@@ -1032,20 +722,7 @@ function setupToolbarEvents() {
     });
   }
 
-  // PROMINENT DIRECT ACCESS TO DOWNLOAD PROGRESS WINDOW (#tbDetails)
-  const tbDetails = document.getElementById('tbDetails');
-  if (tbDetails) {
-    tbDetails.addEventListener('click', () => {
-      const id = getActiveOrSelectedTaskId();
-      if (id) {
-        openDownloadStatus(id);
-      } else {
-        alert('Please select or start a download to view its progress window.');
-      }
-    });
-  }
-
-  // About Dialog buttons
+  // About Dialog
   document.getElementById('aboutCloseBtn')?.addEventListener('click', () => {
     aboutDialogModal?.classList.remove('open');
   });
@@ -1055,10 +732,10 @@ function setupToolbarEvents() {
 
   // Add URL Dialog Actions
   document.getElementById('addUrlDlgClose').addEventListener('click', () => {
-    addUrlDialogModal.classList.remove('open');
+    addUrlDialogModal?.classList.remove('open');
   });
   document.getElementById('btnCancelAdd').addEventListener('click', () => {
-    addUrlDialogModal.classList.remove('open');
+    addUrlDialogModal?.classList.remove('open');
   });
 
   document.getElementById('btnPasteUrl').addEventListener('click', async () => {
@@ -1069,7 +746,7 @@ function setupToolbarEvents() {
     }
   });
 
-  document.getElementById('newUrlInput').addEventListener('change', (e) => {
+  document.getElementById('newUrlInput').addEventListener('input', (e) => {
     const val = e.target.value.trim();
     if (val.startsWith('http://') || val.startsWith('https://')) {
       probeEnteredUrl(val);
@@ -1082,19 +759,16 @@ function setupToolbarEvents() {
   });
 
   document.getElementById('btnStartDownload').addEventListener('click', () => {
-    submitDownload(true);
-  });
-  document.getElementById('btnDownloadLater').addEventListener('click', () => {
-    submitDownload(false);
+    submitDownload();
   });
 
   // Download Status Dialog Actions
   document.getElementById('dlgCloseBtn').addEventListener('click', () => {
-    downloadDialogModal.classList.remove('open');
+    downloadDialogModal?.classList.remove('open');
     state.currentDetailsTaskId = null;
   });
   document.getElementById('dlgHideBtn').addEventListener('click', () => {
-    downloadDialogModal.classList.remove('open');
+    downloadDialogModal?.classList.remove('open');
     state.currentDetailsTaskId = null;
   });
 
@@ -1113,7 +787,7 @@ function setupToolbarEvents() {
   document.getElementById('dlgCancelBtn').addEventListener('click', () => {
     if (state.currentDetailsTaskId) {
       window.api.pauseDownload(state.currentDetailsTaskId);
-      downloadDialogModal.classList.remove('open');
+      downloadDialogModal?.classList.remove('open');
     }
   });
 
@@ -1133,15 +807,19 @@ function setupToolbarEvents() {
   });
 }
 
-async function openAddUrlDialog() {
-  document.getElementById('newUrlInput').value = '';
-  document.getElementById('customFilenameInput').value = '';
+async function openAddUrlDialog(prefillUrl = '', prefillFilename = '') {
+  document.getElementById('newUrlInput').value = prefillUrl || '';
+  document.getElementById('customFilenameInput').value = prefillFilename || '';
   const shaInput = document.getElementById('expectedSha256Input');
   if (shaInput) shaInput.value = '';
   document.getElementById('savePathInput').value = state.defaultDir;
-  document.getElementById('selectThreads').value = String(state.settings.defaultConnections);
   document.getElementById('urlProbeBox').style.display = 'none';
-  addUrlDialogModal.classList.add('open');
+  addUrlDialogModal?.classList.add('open');
+
+  if (prefillUrl) {
+    probeEnteredUrl(prefillUrl);
+    return;
+  }
 
   try {
     const text = await navigator.clipboard.readText();
@@ -1157,6 +835,7 @@ async function probeEnteredUrl(url) {
   const fnLbl = document.getElementById('probeFn');
   const sizeLbl = document.getElementById('probeSize');
   const resumeLbl = document.getElementById('probeResume');
+  const catBadge = document.getElementById('probeCategoryBadge');
 
   box.style.display = 'flex';
   fnLbl.textContent = 'Probing server...';
@@ -1170,6 +849,15 @@ async function probeEnteredUrl(url) {
     resumeLbl.textContent = info.acceptRanges ? 'Yes (Accelerated Range Multi-Part)' : 'No (Single stream)';
     resumeLbl.style.color = info.acceptRanges ? 'var(--color-success)' : 'var(--color-warning)';
 
+    if (catBadge && info.category) {
+      catBadge.textContent = getCategoryFolderName(info.category);
+    }
+
+    // DYNAMIC DESTINATION FOLDER BASED ON CATEGORY
+    if (info.suggestedDir) {
+      document.getElementById('savePathInput').value = info.suggestedDir;
+    }
+
     if (!document.getElementById('customFilenameInput').value && info.filename) {
       document.getElementById('customFilenameInput').value = info.filename;
     }
@@ -1180,7 +868,7 @@ async function probeEnteredUrl(url) {
   }
 }
 
-async function submitDownload(autoStart = true) {
+async function submitDownload() {
   const url = document.getElementById('newUrlInput').value.trim();
   if (!url) {
     alert('Please enter a valid URL');
@@ -1189,24 +877,22 @@ async function submitDownload(autoStart = true) {
 
   const targetDir = document.getElementById('savePathInput').value.trim() || state.defaultDir;
   const filename = document.getElementById('customFilenameInput').value.trim();
-  const maxConnections = parseInt(document.getElementById('selectThreads').value, 10) || state.settings.defaultConnections;
   const expectedSha256 = (document.getElementById('expectedSha256Input')?.value || '').trim();
 
-  addUrlDialogModal.classList.remove('open');
+  addUrlDialogModal?.classList.remove('open');
 
   try {
     const task = await window.api.addDownload({
       url,
       targetDir,
       filename: filename || undefined,
-      maxConnections,
+      maxConnections: 'auto',
+      autoCategorize: true,
       expectedSha256: expectedSha256 || undefined,
-      autoStart
+      autoStart: true
     });
 
-    if (autoStart || state.autoShowPopup) {
-      openDownloadStatus(task.id);
-    }
+    openDownloadStatus(task.id);
   } catch (err) {
     alert('Failed to start download: ' + err.message);
   }
@@ -1218,7 +904,7 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     renderTable();
     updateCategoryCounts();
-    if (state.autoShowPopup && (task.status === 'downloading' || task.status === 'connecting' || task.status === 'pending')) {
+    if (task.status === 'downloading' || task.status === 'connecting' || task.status === 'pending') {
       openDownloadStatus(task.id);
     }
   });
@@ -1227,7 +913,6 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     updateTableRow(task);
     updateCategoryCounts();
-    updateTotalSpeed();
 
     if (state.currentDetailsTaskId === task.id) {
       updateDownloadDialog(task);
@@ -1238,7 +923,6 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     updateTableRow(task);
     updateCategoryCounts();
-    updateTotalSpeed();
 
     if (state.currentDetailsTaskId === task.id) {
       updateDownloadDialog(task);
@@ -1249,12 +933,11 @@ function setupIPCListeners() {
     state.tasks.delete(id);
     if (state.selectedTaskId === id) state.selectedTaskId = null;
     if (state.currentDetailsTaskId === id) {
-      downloadDialogModal.classList.remove('open');
+      downloadDialogModal?.classList.remove('open');
       state.currentDetailsTaskId = null;
     }
     renderTable();
     updateCategoryCounts();
-    updateTotalSpeed();
   });
 
   window.api.onTaskError(({ id, error }) => {
@@ -1272,7 +955,6 @@ function setupIPCListeners() {
   if (window.api.onSettingsUpdated) {
     window.api.onSettingsUpdated((settings) => {
       applySettingsToUI(settings);
-      updateTotalSpeed();
     });
   }
 }

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Progress - Internet Download Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    .progress-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      gap: 12px;
+    }
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .file-badge {
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-color);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .file-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .file-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .metrics-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .metric-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .metric-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .highlight-blue {
+      color: var(--accent-color);
+    }
+    .highlight-speed {
+      color: var(--color-success);
+    }
+    .progress-bar-wrap {
+      margin: 6px 0 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-bar-bg {
+      flex: 1;
+      height: 14px;
+      background: var(--sunken-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-color);
+      width: 0%;
+      transition: width 0.15s ease-out;
+    }
+    .progress-bar-text {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 44px;
+      text-align: right;
+    }
+    .collapsible-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .collapsible-body {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+    .collapsible-body.open {
+      display: block;
+    }
+    .button-row {
+      margin-top: auto;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-container">
+    <!-- Header -->
+    <div class="file-header">
+      <div class="file-badge" id="progBadge">FILE</div>
+      <div class="file-details">
+        <div class="file-name" id="progFileName">Initializing download...</div>
+        <div class="file-sub" id="progUrl">—</div>
+      </div>
+    </div>
+
+    <!-- Metrics Card -->
+    <div class="metrics-card">
+      <div class="metric-row">
+        <span class="metric-label">Status:</span>
+        <span class="metric-value highlight-blue" id="progStatus">Connecting...</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">File size:</span>
+        <span class="metric-value tabular-nums" id="progFileSize">0.00 KB</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Downloaded:</span>
+        <span class="metric-value tabular-nums" id="progDownloaded">0.00 KB (0%)</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Transfer rate:</span>
+        <span class="metric-value highlight-speed tabular-nums" id="progSpeed">0.00 KB/sec</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Time left:</span>
+        <span class="metric-value tabular-nums" id="progTimeLeft">—</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Resume support:</span>
+        <span class="metric-value" id="progResume">Yes</span>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progBarFill"></div>
+      </div>
+      <span class="progress-bar-text tabular-nums" id="progPercent">0%</span>
+    </div>
+
+    <!-- Collapsible File Details -->
+    <div>
+      <div class="collapsible-header" id="btnToggleDetails">
+        <span id="detailsChevron">▶</span> File Details &amp; Checksum
+      </div>
+      <div class="collapsible-body" id="detailsBody">
+        <div style="margin-bottom: 4px;"><b>Saved to:</b> <span id="progSavedPath">—</span></div>
+        <div style="margin-bottom: 4px;"><b>ETag:</b> <span id="progEtag">None</span></div>
+        <div><b>SHA-256:</b> <span id="progSha256">Calculated upon completion</span></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="button-row">
+      <button class="win-btn" id="btnPauseResume">Pause</button>
+      <button class="win-btn" id="btnCancel">Cancel</button>
+      <button class="win-btn win-btn-accent" id="btnOpenFile" style="display: none;">Open File</button>
+      <button class="win-btn" id="btnOpenFolder">Open Folder</button>
+    </div>
+  </div>
+
+  <script src="progress.js"></script>
+</body>
+</html>

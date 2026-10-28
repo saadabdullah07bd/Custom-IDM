@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   getTasks: () => ipcRenderer.invoke('get-tasks'),
+  getTaskById: (taskId) => ipcRenderer.invoke('get-task-by-id', taskId),
+  openProgressWindow: (taskId) => ipcRenderer.invoke('open-progress-window', taskId),
   addDownload: (options) => ipcRenderer.invoke('add-download', options),
   probeUrl: (url) => ipcRenderer.invoke('probe-url', url),
   pauseDownload: (id) => ipcRenderer.invoke('pause-download', id),

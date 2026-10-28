@@ -3,15 +3,27 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { QueueManager } from '../engine/queueManager.js';
 import { startLocalServer } from '../bridge/localServer.js';
-import { probeUrl, getCategoryByFilename } from '../engine/downloader.js';
+import { probeUrl, getCategoryByFilename, getCategoryFolderName, calculateOptimalConnections } from '../engine/downloader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow = null;
+const progressWindows = new Map(); // taskId -> BrowserWindow
 const queueManager = new QueueManager();
 
 let activeServerPort = 1001;
+
+function forwardToAll(channel, payload) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(channel, payload);
+  }
+  for (const win of progressWindows.values()) {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(channel, payload);
+    }
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -19,8 +31,8 @@ function createWindow() {
     height: 680,
     minWidth: 840,
     minHeight: 500,
-    title: 'Personal IDM (Internet Download Manager)',
-    backgroundColor: '#0f172a',
+    title: 'Personal IDM',
+    backgroundColor: '#f8fafc',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -30,53 +42,73 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-  // Forward queueManager events to renderer window
-  queueManager.on('task-added', (task) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('task-added', task);
-    }
-  });
-
-  queueManager.on('task-updated', (task) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('task-updated', task);
-    }
-  });
-
-  queueManager.on('task-completed', (task) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('task-completed', task);
-    }
-  });
-
-  queueManager.on('task-deleted', (id) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('task-deleted', id);
-    }
-  });
-
-  queueManager.on('task-error', (err) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('task-error', err);
-    }
-  });
-
-  queueManager.on('settings-updated', (settings) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('settings-updated', settings);
-    }
-  });
+  // Forward queueManager events to renderer window and all progress windows
+  queueManager.on('task-added', (task) => forwardToAll('task-added', task));
+  queueManager.on('task-updated', (task) => forwardToAll('task-updated', task));
+  queueManager.on('task-completed', (task) => forwardToAll('task-completed', task));
+  queueManager.on('task-deleted', (id) => forwardToAll('task-deleted', id));
+  queueManager.on('task-error', (err) => forwardToAll('task-error', err));
+  queueManager.on('settings-updated', (settings) => forwardToAll('settings-updated', settings));
 }
 
 // IPC Handlers
 ipcMain.handle('get-tasks', () => queueManager.getAllTasks());
 
+ipcMain.handle('get-task-by-id', (_event, taskId) => {
+  const task = queueManager.getTask(taskId);
+  return task ? task.toJSON() : null;
+});
+
 ipcMain.handle('add-download', async (_event, options) => {
   return await queueManager.addTask(options);
 });
 
+ipcMain.handle('open-progress-window', (_event, taskId) => {
+  if (!taskId) return false;
+  if (progressWindows.has(taskId)) {
+    const existing = progressWindows.get(taskId);
+    if (!existing.isDestroyed()) {
+      existing.show();
+      existing.focus();
+      return true;
+    }
+    progressWindows.delete(taskId);
+  }
+
+  const task = queueManager.getTask(taskId);
+  const win = new BrowserWindow({
+    width: 540,
+    height: 420,
+    minWidth: 460,
+    minHeight: 360,
+    title: task ? `${task.filename || 'Download'} - Internet Download Manager` : 'Download Progress',
+    resizable: true,
+    backgroundColor: '#f8fafc',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  win.loadFile(path.join(__dirname, '../renderer/progress.html'), {
+    query: { taskId }
+  });
+
+  progressWindows.set(taskId, win);
+
+  win.on('closed', () => {
+    progressWindows.delete(taskId);
+  });
+
+  return true;
+});
+
 ipcMain.handle('probe-url', async (_event, url) => {
   const probe = await probeUrl(url);
+  const category = getCategoryByFilename(probe.filename);
+  const catFolder = getCategoryFolderName(category);
+  const suggestedDir = path.join(queueManager.defaultDownloadDir, catFolder);
   return {
     url,
     finalUrl: probe.finalUrl,
@@ -86,7 +118,10 @@ ipcMain.handle('probe-url', async (_event, url) => {
     resumable: probe.acceptRanges,
     etag: probe.etag,
     lastModified: probe.lastModified,
-    category: getCategoryByFilename(probe.filename)
+    category,
+    categoryFolder: catFolder,
+    suggestedDir,
+    optimalConnections: calculateOptimalConnections(probe.contentLength, probe.acceptRanges)
   };
 });
 
