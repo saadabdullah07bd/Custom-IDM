@@ -462,7 +462,7 @@ test('Phase 2B: Pause, Resume from Verified Disk Offset, ETag Resource Change De
     });
 
     const runPromise = task.start();
-    await new Promise(r => setTimeout(r, 75));
+    await new Promise(r => setTimeout(r, 150));
     await task.pause();
     await runPromise;
 

@@ -74,6 +74,22 @@ function formatTime(seconds) {
   return `${hrs} hr ${mins % 60} min`;
 }
 
+function getFileBadgeText(cat, filename = '') {
+  const parts = (filename || '').split('.');
+  if (parts.length > 1) {
+    const ext = parts.pop().toUpperCase().slice(0, 4);
+    if (ext && ext.length >= 2) return ext;
+  }
+  switch (cat) {
+    case 'compressed': return 'ZIP';
+    case 'programs': return 'EXE';
+    case 'documents': return 'DOC';
+    case 'video': return 'MP4';
+    case 'music': return 'MP3';
+    default: return 'FILE';
+  }
+}
+
 function getFileIconClass(cat) {
   switch (cat) {
     case 'compressed': return 'icon-zip';
@@ -103,6 +119,18 @@ function applySettingsToUI(settings) {
 }
 
 async function init() {
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  if (themeToggleBtn) {
+    const savedTheme = localStorage.getItem('personal-idm-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('personal-idm-theme', next);
+    });
+  }
+
   const settings = await window.api.getSettings();
   applySettingsToUI(settings);
 
@@ -271,7 +299,7 @@ function renderTable() {
     tr.innerHTML = `
       <td>
         <div class="cell-file">
-          <span class="file-type-icon ${getFileIconClass(task.category)}"></span>
+          <span class="file-type-icon ${getFileIconClass(task.category)}">${getFileBadgeText(task.category, task.filename)}</span>
           <span title="${task.filename || ''}">${task.filename || 'Initializing...'}</span>
         </div>
       </td>
@@ -280,7 +308,7 @@ function renderTable() {
       <td class="tabular-nums">${task.status === 'downloading' ? formatTime(task.timeLeft) : '—'}</td>
       <td class="tabular-nums">${task.status === 'downloading' ? formatSpeed(task.speed) : '—'}</td>
       <td class="tabular-nums">${dateFormatted}</td>
-      <td style="color: ${task.error ? '#b91c1c' : '#555'};" title="${desc}">${desc}</td>
+      <td style="color: ${task.error ? 'var(--color-danger)' : 'var(--text-secondary)'};" title="${desc}">${desc}</td>
     `;
 
     tableBody.appendChild(tr);
