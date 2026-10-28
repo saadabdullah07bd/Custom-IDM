@@ -1,4 +1,5 @@
-// Authentic IDM Renderer Logic with Modernized Filtering, Sorting, and Dialog Controls
+// Personal IDM — Native Windows 11 Fluent Desktop Renderer Logic
+// Pairs with Electron main process, multi-segment download engine & loopback bridge
 
 const state = {
   tasks: new Map(),
@@ -10,6 +11,7 @@ const state = {
   sortAsc: false,
   currentDetailsTaskId: null,
   defaultDir: '',
+  autoShowPopup: true,
   settings: {
     defaultDownloadDir: '',
     defaultConnections: 8,
@@ -43,8 +45,11 @@ const addUrlDialogModal = document.getElementById('addUrlDialogModal');
 const optionsDialogModal = document.getElementById('optionsDialogModal');
 const schedulerDialogModal = document.getElementById('schedulerDialogModal');
 const grabberDialogModal = document.getElementById('grabberDialogModal');
+const aboutDialogModal = document.getElementById('aboutDialogModal');
 
-// Format Helpers matching exact IDM formats
+// ========================================================
+// FORMAT HELPERS MATCHING IDM EXACT SPECIFICATION
+// ========================================================
 function formatBytes(bytes) {
   if (!bytes || bytes <= 0) return '0.00 KB';
   if (bytes < 1024 * 1024) {
@@ -101,34 +106,61 @@ function getFileIconClass(cat) {
   }
 }
 
+function getActiveOrSelectedTaskId() {
+  if (state.selectedTaskId && state.tasks.has(state.selectedTaskId)) {
+    return state.selectedTaskId;
+  }
+  for (const [id, t] of state.tasks.entries()) {
+    if (t.status === 'downloading' || t.status === 'connecting' || t.status === 'merging') {
+      return id;
+    }
+  }
+  const first = state.tasks.keys().next().value;
+  return first || null;
+}
+
 function applySettingsToUI(settings) {
   state.settings = { ...state.settings, ...settings };
   state.defaultDir = state.settings.defaultDownloadDir;
 
-  sbDefaultDir.textContent = `Save to: ${state.defaultDir}`;
-  document.getElementById('savePathInput').value = state.defaultDir;
-  document.getElementById('optSaveDir').value = state.defaultDir;
-  document.getElementById('selectThreads').value = String(state.settings.defaultConnections);
-  document.getElementById('optDefaultConn').value = String(state.settings.defaultConnections);
+  if (sbDefaultDir) sbDefaultDir.textContent = `Save to: ${state.defaultDir}`;
+  const savePathInput = document.getElementById('savePathInput');
+  if (savePathInput) savePathInput.value = state.defaultDir;
+  const optSaveDir = document.getElementById('optSaveDir');
+  if (optSaveDir) optSaveDir.value = state.defaultDir;
+  
+  const selectThreads = document.getElementById('selectThreads');
+  if (selectThreads) selectThreads.value = String(state.settings.defaultConnections);
+  const optDefaultConn = document.getElementById('optDefaultConn');
+  if (optDefaultConn) optDefaultConn.value = String(state.settings.defaultConnections);
 
   const maxConcEl = document.getElementById('optMaxConcurrent');
   if (maxConcEl) maxConcEl.value = String(state.settings.maxConcurrent);
 
   const speedLimEl = document.getElementById('optSpeedLimit');
   if (speedLimEl) speedLimEl.value = String(state.settings.speedLimitKbps || 0);
+
+  const autoPopupEl = document.getElementById('optAutoShowPopup');
+  if (autoPopupEl) autoPopupEl.checked = state.autoShowPopup;
 }
 
+// ========================================================
+// INITIALIZATION
+// ========================================================
 async function init() {
+  // Theme initialization (Native Windows 11: clean light default with dark support)
+  const savedTheme = localStorage.getItem('personal-idm-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   if (themeToggleBtn) {
-    const savedTheme = localStorage.getItem('personal-idm-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggleBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('personal-idm-theme', next);
-    });
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
+
+  // Auto popup preference
+  const savedAutoPopup = localStorage.getItem('personal-idm-auto-popup');
+  if (savedAutoPopup !== null) {
+    state.autoShowPopup = savedAutoPopup !== 'false';
   }
 
   const settings = await window.api.getSettings();
@@ -147,11 +179,22 @@ async function init() {
   updateSortIndicators();
   renderTable();
   updateCategoryCounts();
+  setupMenubar();
   setupToolbarEvents();
   setupFilterAndSortEvents();
   setupIPCListeners();
 }
 
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('personal-idm-theme', next);
+}
+
+// ========================================================
+// TABLE & STATUS CELL RENDERING
+// ========================================================
 function renderStatusCellHtml(task) {
   if (task.status === 'downloading' || task.status === 'connecting') {
     const percent = Math.min(100, Math.max(0, task.percentage || 0));
@@ -256,7 +299,7 @@ function renderTable() {
   const totalCount = state.tasks.size;
 
   tableBody.innerHTML = '';
-  sbTaskCount.textContent = `${filtered.length} of ${totalCount} downloads`;
+  if (sbTaskCount) sbTaskCount.textContent = `${filtered.length} of ${totalCount} downloads`;
 
   if (activeFilterSummary) {
     const parts = [];
@@ -332,7 +375,7 @@ function updateTableRow(task) {
     ? `Error: ${task.error}`
     : (task.sha256 ? `SHA256: ${task.sha256.slice(0, 14)}...` : `${task.category} (${task.maxConnections} conn)`);
   tr.cells[6].textContent = desc;
-  tr.cells[6].style.color = task.error ? '#b91c1c' : '#555';
+  tr.cells[6].style.color = task.error ? 'var(--color-danger)' : 'var(--text-secondary)';
 }
 
 function selectRow(id) {
@@ -345,14 +388,14 @@ function selectRow(id) {
 
 function updateCategoryCounts() {
   const allTasks = Array.from(state.tasks.values());
-  countAll.textContent = allTasks.length;
-  countCompressed.textContent = allTasks.filter(t => t.category === 'compressed').length;
-  countDocuments.textContent = allTasks.filter(t => t.category === 'documents').length;
-  countMusic.textContent = allTasks.filter(t => t.category === 'music').length;
-  countPrograms.textContent = allTasks.filter(t => t.category === 'programs').length;
-  countVideo.textContent = allTasks.filter(t => t.category === 'video').length;
-  countUnfinished.textContent = allTasks.filter(t => t.status !== 'completed').length;
-  countFinished.textContent = allTasks.filter(t => t.status === 'completed').length;
+  if (countAll) countAll.textContent = allTasks.length;
+  if (countCompressed) countCompressed.textContent = allTasks.filter(t => t.category === 'compressed').length;
+  if (countDocuments) countDocuments.textContent = allTasks.filter(t => t.category === 'documents').length;
+  if (countMusic) countMusic.textContent = allTasks.filter(t => t.category === 'music').length;
+  if (countPrograms) countPrograms.textContent = allTasks.filter(t => t.category === 'programs').length;
+  if (countVideo) countVideo.textContent = allTasks.filter(t => t.category === 'video').length;
+  if (countUnfinished) countUnfinished.textContent = allTasks.filter(t => t.status !== 'completed').length;
+  if (countFinished) countFinished.textContent = allTasks.filter(t => t.status === 'completed').length;
 }
 
 function updateTotalSpeed() {
@@ -361,7 +404,7 @@ function updateTotalSpeed() {
     if (t.status === 'downloading') total += (t.speed || 0);
   }
   const limitLabel = state.settings.speedLimitKbps > 0 ? ` (Cap: ${state.settings.speedLimitKbps} KB/s)` : '';
-  sbSpeed.textContent = `Speed: ${formatSpeed(total)}${limitLabel}`;
+  if (sbSpeed) sbSpeed.textContent = `Speed: ${formatSpeed(total)}${limitLabel}`;
 }
 
 // ========================================================
@@ -378,7 +421,8 @@ function openDownloadStatus(id) {
 
 function updateDownloadDialog(task) {
   const percent = task.percentage || 0;
-  document.getElementById('dlgTitle').textContent = `${percent}% of ${task.filename || 'file'} - Internet Download Manager`;
+  const dlgTitle = document.getElementById('dlgTitle');
+  if (dlgTitle) dlgTitle.textContent = `${percent}% of ${task.filename || 'file'} - Internet Download Manager`;
 
   let statusDisplay = task.status;
   if (task.status === 'downloading') {
@@ -395,17 +439,30 @@ function updateDownloadDialog(task) {
     statusDisplay = `Error: ${task.error || 'Download failed'}`;
   }
 
-  document.getElementById('dlgStatusText').textContent = statusDisplay;
-  document.getElementById('dlgFileSize').textContent = formatBytes(task.totalBytes);
-  document.getElementById('dlgDownloaded').textContent = `${formatBytes(task.downloadedBytes)} (${percent.toFixed(2)}%)`;
-  document.getElementById('dlgTransferRate').textContent = task.status === 'downloading' ? formatSpeed(task.speed) : '0.00 KB/sec';
-  document.getElementById('dlgTimeLeft').textContent = task.status === 'downloading'
-    ? (task.speed > 0 ? formatTime(task.timeLeft) : 'Calculating...')
-    : (task.status === 'completed' ? '0 sec (Finished)' : '—');
+  const dlgStatusText = document.getElementById('dlgStatusText');
+  if (dlgStatusText) dlgStatusText.textContent = statusDisplay;
+
+  const dlgFileSize = document.getElementById('dlgFileSize');
+  if (dlgFileSize) dlgFileSize.textContent = formatBytes(task.totalBytes);
+
+  const dlgDownloaded = document.getElementById('dlgDownloaded');
+  if (dlgDownloaded) dlgDownloaded.textContent = `${formatBytes(task.downloadedBytes)} (${percent.toFixed(2)}%)`;
+
+  const dlgTransferRate = document.getElementById('dlgTransferRate');
+  if (dlgTransferRate) dlgTransferRate.textContent = task.status === 'downloading' ? formatSpeed(task.speed) : '0.00 KB/sec';
+
+  const dlgTimeLeft = document.getElementById('dlgTimeLeft');
+  if (dlgTimeLeft) {
+    dlgTimeLeft.textContent = task.status === 'downloading'
+      ? (task.speed > 0 ? formatTime(task.timeLeft) : 'Calculating...')
+      : (task.status === 'completed' ? '0 sec (Finished)' : '—');
+  }
 
   const resumeCap = document.getElementById('dlgResumeCap');
-  resumeCap.textContent = task.resumable ? 'Yes' : 'No';
-  resumeCap.style.color = task.resumable ? '#008000' : '#cc8800';
+  if (resumeCap) {
+    resumeCap.textContent = task.resumable ? 'Yes' : 'No';
+    resumeCap.style.color = task.resumable ? 'var(--color-success)' : 'var(--color-warning)';
+  }
 
   // File Info tab fields
   const infoUrl = document.getElementById('dlgInfoUrl');
@@ -425,26 +482,30 @@ function updateDownloadDialog(task) {
     }
   }
 
-  // Green progress bar
+  // Segmented progress bar
   const pbar = document.getElementById('dlgProgressBar');
   const plbl = document.getElementById('dlgPercentLabel');
-  pbar.style.width = `${percent}%`;
-  plbl.textContent = `${percent}%`;
+  if (pbar) pbar.style.width = `${percent}%`;
+  if (plbl) plbl.textContent = `${percent}%`;
 
   // Pause / Resume button
   const pauseBtn = document.getElementById('dlgPauseResumeBtn');
-  if (task.status === 'downloading' || task.status === 'connecting') {
-    pauseBtn.textContent = 'Pause';
-    pauseBtn.style.display = 'inline-block';
-  } else if (task.status === 'paused' || task.status === 'pending' || task.status === 'error') {
-    pauseBtn.textContent = 'Resume';
-    pauseBtn.style.display = 'inline-block';
-  } else {
-    pauseBtn.style.display = 'none';
+  if (pauseBtn) {
+    if (task.status === 'downloading' || task.status === 'connecting') {
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.style.display = 'inline-block';
+    } else if (task.status === 'paused' || task.status === 'pending' || task.status === 'error') {
+      pauseBtn.textContent = 'Resume';
+      pauseBtn.style.display = 'inline-block';
+    } else {
+      pauseBtn.style.display = 'none';
+    }
   }
 
   const openBtn = document.getElementById('dlgOpenFileBtn');
-  openBtn.style.display = (task.status === 'completed') ? 'inline-block' : 'none';
+  if (openBtn) {
+    openBtn.style.display = (task.status === 'completed') ? 'inline-block' : 'none';
+  }
 
   renderThreadSegments(task);
 }
@@ -459,8 +520,9 @@ function getSegmentStateClass(segStatus) {
 function renderThreadSegments(task) {
   const grid = document.getElementById('dlgSegmentsGrid');
   const countLbl = document.getElementById('dlgConnCount');
-  const segments = task.segments || [];
+  if (!grid || !countLbl) return;
 
+  const segments = task.segments || [];
   const activeCount = segments.filter(s => s.status === 'downloading').length;
   countLbl.textContent = `${segments.length} segment(s) (${activeCount} active / max ${task.maxConnections})`;
 
@@ -493,6 +555,210 @@ function renderThreadSegments(task) {
       <span class="thread-lane-percent">${p}%</span>
     `;
     grid.appendChild(row);
+  });
+}
+
+// ========================================================
+// WORKING NATIVE WINDOWS MENUBAR CONTROLLER
+// ========================================================
+function setupMenubar() {
+  const menuList = [
+    { btnId: 'menuFile', dropdownId: 'dropdownFile' },
+    { btnId: 'menuTasks', dropdownId: 'dropdownTasks' },
+    { btnId: 'menuDownloads', dropdownId: 'dropdownDownloads' },
+    { btnId: 'menuTools', dropdownId: 'dropdownTools' },
+    { btnId: 'menuView', dropdownId: 'dropdownView' },
+    { btnId: 'menuHelp', dropdownId: 'dropdownHelp' }
+  ];
+
+  let activeMenuBtn = null;
+
+  function closeAllMenus() {
+    menuList.forEach(({ btnId, dropdownId }) => {
+      const btn = document.getElementById(btnId);
+      const dd = document.getElementById(dropdownId);
+      if (btn) {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+      if (dd) dd.classList.remove('show');
+    });
+    activeMenuBtn = null;
+  }
+
+  function openMenu(btn, dd) {
+    closeAllMenus();
+    btn.classList.add('active');
+    btn.setAttribute('aria-expanded', 'true');
+    dd.classList.add('show');
+    activeMenuBtn = btn;
+  }
+
+  menuList.forEach(({ btnId, dropdownId }) => {
+    const btn = document.getElementById(btnId);
+    const dd = document.getElementById(dropdownId);
+    if (!btn || !dd) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeMenuBtn === btn) {
+        closeAllMenus();
+      } else {
+        openMenu(btn, dd);
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => {
+      if (activeMenuBtn && activeMenuBtn !== btn) {
+        openMenu(btn, dd);
+      }
+    });
+  });
+
+  // Clicking outside closes open menus
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-dropdown-wrapper')) {
+      closeAllMenus();
+    }
+  });
+
+  // Esc closes open menu
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && activeMenuBtn) {
+      closeAllMenus();
+    }
+  });
+
+  // Menu item click dispatcher
+  document.querySelectorAll('.menu-action').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeAllMenus();
+      handleMenuAction(item.id);
+    });
+  });
+}
+
+function handleMenuAction(actionId) {
+  switch (actionId) {
+    // File
+    case 'menuActionAddUrl':
+      openAddUrlDialog();
+      break;
+    case 'menuActionOpenFolder':
+      window.api.openFile(state.defaultDir);
+      break;
+    case 'menuActionExit':
+      window.close();
+      break;
+
+    // Tasks
+    case 'menuActionResume': {
+      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+      if (id) window.api.resumeDownload(id);
+      break;
+    }
+    case 'menuActionStop': {
+      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+      if (id) window.api.pauseDownload(id);
+      break;
+    }
+    case 'menuActionStopAll':
+      window.api.pauseAll();
+      break;
+    case 'menuActionDelete': {
+      const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+      if (id) {
+        const task = state.tasks.get(id);
+        if (confirm(`Delete "${task ? task.filename : 'download'}" and clean up temporary part files?`)) {
+          window.api.deleteDownload(id, false, false);
+        }
+      } else {
+        alert('Please select a download to delete.');
+      }
+      break;
+    }
+    case 'menuActionDeleteCompleted':
+      for (const task of state.tasks.values()) {
+        if (task.status === 'completed') {
+          window.api.deleteDownload(task.id, false, false);
+        }
+      }
+      break;
+
+    // Downloads
+    case 'menuActionShowStatus': {
+      const id = getActiveOrSelectedTaskId();
+      if (id) openDownloadStatus(id);
+      else alert('No active or selected download to show. Start a download first!');
+      break;
+    }
+    case 'menuActionStartQueue':
+      window.api.resumeAll();
+      break;
+    case 'menuActionStopQueue':
+      window.api.pauseAll();
+      break;
+    case 'menuActionSpeedLimit':
+      openOptionsModal('optTabConnBtn', 'optPaneConn');
+      break;
+
+    // Tools
+    case 'menuActionOptions':
+      openOptionsModal();
+      break;
+    case 'menuActionScheduler':
+      if (schedulerDialogModal) schedulerDialogModal.classList.add('open');
+      break;
+    case 'menuActionGrabber':
+      if (grabberDialogModal) grabberDialogModal.classList.add('open');
+      break;
+
+    // View
+    case 'menuActionToggleTheme':
+      toggleTheme();
+      break;
+    case 'menuActionFilterAll':
+      state.statusFilter = 'all';
+      state.activeCategory = 'all';
+      syncFiltersUI();
+      renderTable();
+      break;
+    case 'menuActionFilterDownloading':
+      state.statusFilter = 'downloading';
+      syncFiltersUI();
+      renderTable();
+      break;
+    case 'menuActionFilterCompleted':
+      state.statusFilter = 'completed';
+      syncFiltersUI();
+      renderTable();
+      break;
+    case 'menuActionResetFilters':
+      state.searchQuery = '';
+      state.statusFilter = 'all';
+      state.activeCategory = 'all';
+      syncFiltersUI();
+      renderTable();
+      break;
+
+    // Help
+    case 'menuActionAbout':
+      if (aboutDialogModal) aboutDialogModal.classList.add('open');
+      break;
+  }
+}
+
+function syncFiltersUI() {
+  const searchInput = document.getElementById('searchFilterInput');
+  const statusSelect = document.getElementById('statusFilterSelect');
+  if (searchInput) searchInput.value = state.searchQuery;
+  if (statusSelect) statusSelect.value = state.statusFilter;
+
+  document.querySelectorAll('.tree-item-row').forEach(row => {
+    const cat = row.getAttribute('data-cat');
+    if (cat === state.activeCategory) row.classList.add('selected');
+    else row.classList.remove('selected');
   });
 }
 
@@ -546,13 +812,20 @@ function setupFilterAndSortEvents() {
 
   // Global Keyboard Navigation
   document.addEventListener('keydown', (e) => {
+    const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
     if (e.key === 'Escape') {
-      downloadDialogModal.classList.remove('open');
-      addUrlDialogModal.classList.remove('open');
-      optionsDialogModal.classList.remove('open');
-      if (schedulerDialogModal) schedulerDialogModal.classList.remove('open');
-      if (grabberDialogModal) grabberDialogModal.classList.remove('open');
-    } else if (e.key === 'Delete' && state.selectedTaskId && document.activeElement?.tagName !== 'INPUT') {
+      downloadDialogModal?.classList.remove('open');
+      addUrlDialogModal?.classList.remove('open');
+      optionsDialogModal?.classList.remove('open');
+      schedulerDialogModal?.classList.remove('open');
+      grabberDialogModal?.classList.remove('open');
+      aboutDialogModal?.classList.remove('open');
+    } else if (e.key === 'Insert' && !isInput) {
+      openAddUrlDialog();
+    } else if (e.key === 'Enter' && !isInput) {
+      const id = getActiveOrSelectedTaskId();
+      if (id) openDownloadStatus(id);
+    } else if (e.key === 'Delete' && state.selectedTaskId && !isInput) {
       const task = state.tasks.get(state.selectedTaskId);
       if (task && confirm(`Delete "${task.filename}" and clean up temporary part files?`)) {
         window.api.deleteDownload(state.selectedTaskId, false, false);
@@ -564,6 +837,35 @@ function setupFilterAndSortEvents() {
 // ========================================================
 // TOOLBAR & DIALOG INTERACTION SETUP
 // ========================================================
+async function openOptionsModal(activeTabBtnId = 'optTabGeneralBtn', activeTabPaneId = 'optPaneGeneral') {
+  const currentSettings = await window.api.getSettings();
+  applySettingsToUI(currentSettings);
+  const port = await window.api.getServerPort();
+  const portLbl = document.getElementById('optActivePortLabel');
+  if (portLbl) portLbl.textContent = `127.0.0.1:${port}`;
+
+  const optTabs = [
+    { btn: document.getElementById('optTabGeneralBtn'), pane: document.getElementById('optPaneGeneral') },
+    { btn: document.getElementById('optTabConnBtn'), pane: document.getElementById('optPaneConn') },
+    { btn: document.getElementById('optTabBridgeBtn'), pane: document.getElementById('optPaneBridge') }
+  ];
+  optTabs.forEach(({ btn, pane }) => {
+    if (!btn || !pane) return;
+    if (btn.id === activeTabBtnId) {
+      btn.classList.add('active');
+      pane.style.display = 'flex';
+    } else {
+      btn.classList.remove('active');
+      pane.style.display = 'none';
+    }
+  });
+
+  const autoPopupEl = document.getElementById('optAutoShowPopup');
+  if (autoPopupEl) autoPopupEl.checked = state.autoShowPopup;
+
+  optionsDialogModal.classList.add('open');
+}
+
 function setupToolbarEvents() {
   // Tree item selection
   document.querySelectorAll('.tree-item-row').forEach(row => {
@@ -624,11 +926,13 @@ function setupToolbarEvents() {
   document.getElementById('tbAddUrl').addEventListener('click', openAddUrlDialog);
 
   document.getElementById('tbResume').addEventListener('click', () => {
-    if (state.selectedTaskId) window.api.resumeDownload(state.selectedTaskId);
+    const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+    if (id) window.api.resumeDownload(id);
   });
 
   document.getElementById('tbStop').addEventListener('click', () => {
-    if (state.selectedTaskId) window.api.pauseDownload(state.selectedTaskId);
+    const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+    if (id) window.api.pauseDownload(id);
   });
 
   document.getElementById('tbStopAll').addEventListener('click', () => {
@@ -644,10 +948,11 @@ function setupToolbarEvents() {
   });
 
   document.getElementById('tbDelete').addEventListener('click', () => {
-    if (state.selectedTaskId) {
-      const task = state.tasks.get(state.selectedTaskId);
+    const id = state.selectedTaskId || getActiveOrSelectedTaskId();
+    if (id) {
+      const task = state.tasks.get(id);
       const conf = confirm(`Delete "${task ? task.filename : 'download'}" and clean up temporary part files?`);
-      if (conf) window.api.deleteDownload(state.selectedTaskId, false, false);
+      if (conf) window.api.deleteDownload(id, false, false);
     }
   });
 
@@ -660,13 +965,8 @@ function setupToolbarEvents() {
   });
 
   // Options Button & Dialog
-  document.getElementById('tbOptions').addEventListener('click', async () => {
-    const currentSettings = await window.api.getSettings();
-    applySettingsToUI(currentSettings);
-    const port = await window.api.getServerPort();
-    const portLbl = document.getElementById('optActivePortLabel');
-    if (portLbl) portLbl.textContent = `127.0.0.1:${port}`;
-    optionsDialogModal.classList.add('open');
+  document.getElementById('tbOptions').addEventListener('click', () => {
+    openOptionsModal();
   });
 
   document.getElementById('optionsCloseBtn').addEventListener('click', () => {
@@ -683,6 +983,12 @@ function setupToolbarEvents() {
 
   document.getElementById('optSaveBtn').addEventListener('click', async () => {
     try {
+      const autoPopupEl = document.getElementById('optAutoShowPopup');
+      if (autoPopupEl) {
+        state.autoShowPopup = autoPopupEl.checked;
+        localStorage.setItem('personal-idm-auto-popup', String(state.autoShowPopup));
+      }
+
       const newSettings = {
         defaultDownloadDir: document.getElementById('optSaveDir').value.trim(),
         defaultConnections: parseInt(document.getElementById('optDefaultConn').value, 10) || 8,
@@ -725,6 +1031,27 @@ function setupToolbarEvents() {
       grabberDialogModal.classList.remove('open');
     });
   }
+
+  // PROMINENT DIRECT ACCESS TO DOWNLOAD PROGRESS WINDOW (#tbDetails)
+  const tbDetails = document.getElementById('tbDetails');
+  if (tbDetails) {
+    tbDetails.addEventListener('click', () => {
+      const id = getActiveOrSelectedTaskId();
+      if (id) {
+        openDownloadStatus(id);
+      } else {
+        alert('Please select or start a download to view its progress window.');
+      }
+    });
+  }
+
+  // About Dialog buttons
+  document.getElementById('aboutCloseBtn')?.addEventListener('click', () => {
+    aboutDialogModal?.classList.remove('open');
+  });
+  document.getElementById('aboutOkBtn')?.addEventListener('click', () => {
+    aboutDialogModal?.classList.remove('open');
+  });
 
   // Add URL Dialog Actions
   document.getElementById('addUrlDlgClose').addEventListener('click', () => {
@@ -841,7 +1168,7 @@ async function probeEnteredUrl(url) {
     fnLbl.textContent = info.filename || 'Unknown';
     sizeLbl.textContent = formatBytes(info.totalBytes);
     resumeLbl.textContent = info.acceptRanges ? 'Yes (Accelerated Range Multi-Part)' : 'No (Single stream)';
-    resumeLbl.style.color = info.acceptRanges ? '#008000' : '#cc8800';
+    resumeLbl.style.color = info.acceptRanges ? 'var(--color-success)' : 'var(--color-warning)';
 
     if (!document.getElementById('customFilenameInput').value && info.filename) {
       document.getElementById('customFilenameInput').value = info.filename;
@@ -877,7 +1204,7 @@ async function submitDownload(autoStart = true) {
       autoStart
     });
 
-    if (autoStart) {
+    if (autoStart || state.autoShowPopup) {
       openDownloadStatus(task.id);
     }
   } catch (err) {
@@ -891,6 +1218,9 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     renderTable();
     updateCategoryCounts();
+    if (state.autoShowPopup && (task.status === 'downloading' || task.status === 'connecting' || task.status === 'pending')) {
+      openDownloadStatus(task.id);
+    }
   });
 
   window.api.onTaskUpdated((task) => {

@@ -1,235 +1,352 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal IDM — Next-Gen Download Accelerator</title>
+  <title>Personal IDM</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- MAIN APPLICATION WINDOW -->
+  <!-- MAIN WINDOW -->
   <div class="idm-window">
     
-    <!-- MODERN APPLICATION HEADER & BRAND -->
-    <header class="idm-header">
-      <div class="header-left">
-        <div class="brand-badge">
-          <svg class="brand-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- NATIVE WINDOWS 11 MENUBAR & APP HEADER -->
+    <header class="win-header">
+      <div class="win-title-strip">
+        <div class="win-app-identity">
+          <svg class="win-app-logo" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          <span class="brand-name">Personal IDM</span>
-          <span class="brand-version">v1.0</span>
+          <span class="win-app-title">Personal IDM</span>
         </div>
 
-        <nav class="idm-menubar" role="menubar" aria-label="Application Menu">
-          <div class="menu-item" id="menuTasks" role="menuitem" tabindex="0">Tasks</div>
-          <div class="menu-item" id="menuFile" role="menuitem" tabindex="0">File</div>
-          <div class="menu-item" id="menuDownloads" role="menuitem" tabindex="0">Downloads</div>
-          <div class="menu-item" id="menuView" role="menuitem" tabindex="0">View</div>
-          <div class="menu-item" id="menuHelp" role="menuitem" tabindex="0">Help</div>
+        <!-- WORKING WINDOWS DROPDOWN MENUBAR -->
+        <nav class="win-menubar" role="menubar" aria-label="Application Menu">
+          <!-- File Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuFile" role="menuitem" aria-haspopup="true" aria-expanded="false">File</button>
+            <div class="menu-dropdown" id="dropdownFile" role="menu">
+              <div class="menu-action" id="menuActionAddUrl">
+                <span class="action-label">Add New Download...</span>
+                <span class="action-shortcut">Insert</span>
+              </div>
+              <div class="menu-action" id="menuActionOpenFolder">
+                <span class="action-label">Open Downloads Folder</span>
+                <span class="action-shortcut">Ctrl+O</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionExit">
+                <span class="action-label">Exit</span>
+                <span class="action-shortcut">Alt+F4</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuTasks" role="menuitem" aria-haspopup="true" aria-expanded="false">Tasks</button>
+            <div class="menu-dropdown" id="dropdownTasks" role="menu">
+              <div class="menu-action" id="menuActionResume">
+                <span class="action-label">Resume Selected</span>
+                <span class="action-shortcut">Ctrl+R</span>
+              </div>
+              <div class="menu-action" id="menuActionStop">
+                <span class="action-label">Stop Selected</span>
+                <span class="action-shortcut">Ctrl+P</span>
+              </div>
+              <div class="menu-action" id="menuActionStopAll">
+                <span class="action-label">Stop All Downloads</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionDelete">
+                <span class="action-label">Delete Selected</span>
+                <span class="action-shortcut">Del</span>
+              </div>
+              <div class="menu-action" id="menuActionDeleteCompleted">
+                <span class="action-label">Clear Completed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Downloads Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuDownloads" role="menuitem" aria-haspopup="true" aria-expanded="false">Downloads</button>
+            <div class="menu-dropdown" id="dropdownDownloads" role="menu">
+              <div class="menu-action" id="menuActionShowStatus">
+                <span class="action-label"><b>Download Progress Window...</b></span>
+                <span class="action-shortcut">Enter</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionStartQueue">
+                <span class="action-label">Start Queue</span>
+              </div>
+              <div class="menu-action" id="menuActionStopQueue">
+                <span class="action-label">Stop Queue</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionSpeedLimit">
+                <span class="action-label">Speed Limiter Configuration...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tools Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuTools" role="menuitem" aria-haspopup="true" aria-expanded="false">Tools</button>
+            <div class="menu-dropdown" id="dropdownTools" role="menu">
+              <div class="menu-action" id="menuActionOptions">
+                <span class="action-label">Options &amp; Settings...</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionScheduler">
+                <span class="action-label">Scheduler...</span>
+              </div>
+              <div class="menu-action" id="menuActionGrabber">
+                <span class="action-label">Site Grabber...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- View Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuView" role="menuitem" aria-haspopup="true" aria-expanded="false">View</button>
+            <div class="menu-dropdown" id="dropdownView" role="menu">
+              <div class="menu-action" id="menuActionToggleTheme">
+                <span class="action-label">Toggle Dark / Light Theme</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionFilterAll">
+                <span class="action-label">Filter: All Downloads</span>
+              </div>
+              <div class="menu-action" id="menuActionFilterDownloading">
+                <span class="action-label">Filter: Downloading Only</span>
+              </div>
+              <div class="menu-action" id="menuActionFilterCompleted">
+                <span class="action-label">Filter: Completed Only</span>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-action" id="menuActionResetFilters">
+                <span class="action-label">Reset View Filters</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help Menu -->
+          <div class="menu-dropdown-wrapper">
+            <button class="menu-item" id="menuHelp" role="menuitem" aria-haspopup="true" aria-expanded="false">Help</button>
+            <div class="menu-dropdown" id="dropdownHelp" role="menu">
+              <div class="menu-action" id="menuActionAbout">
+                <span class="action-label">About Personal IDM...</span>
+              </div>
+            </div>
+          </div>
         </nav>
       </div>
 
-      <div class="header-right">
-        <div class="bridge-status-pill" id="headerBridgeStatus" title="Local Loopback Server Status">
-          <span class="status-indicator-dot online"></span>
-          <span class="bridge-status-text">Bridge Active</span>
+      <div class="win-header-controls">
+        <div class="win-bridge-badge" id="headerBridgeStatus" title="Local Loopback Server Status">
+          <span class="bridge-dot online"></span>
+          <span>Bridge 127.0.0.1</span>
         </div>
-        <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Mode" aria-label="Toggle theme">
-          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <button class="win-icon-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle theme">
+          <svg class="sun-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </button>
       </div>
     </header>
 
-    <!-- MODERN ACTION TOOLBAR -->
+    <!-- CLEAN WINDOWS COMMAND BAR (TOOLBAR) -->
     <div class="idm-toolbar" role="toolbar" aria-label="Main Download Actions">
-      <div class="tb-group primary-actions">
-        <button class="tb-btn btn-primary-action" id="tbAddUrl" title="Add new download URL (Insert)">
-          <div class="tb-icon icon-add">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </div>
-          <span class="tb-label">Add URL</span>
-        </button>
+      <button class="tb-btn tb-btn-accent" id="tbAddUrl" title="Add new download URL (Insert)">
+        <div class="tb-icon icon-add">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <span class="tb-label">Add URL</span>
+      </button>
 
-        <button class="tb-btn" id="tbResume" title="Resume selected download">
-          <div class="tb-icon icon-resume">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          </div>
-          <span class="tb-label">Resume</span>
-        </button>
+      <button class="tb-btn" id="tbResume" title="Resume selected download (Ctrl+R)">
+        <div class="tb-icon icon-resume">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </div>
+        <span class="tb-label">Resume</span>
+      </button>
 
-        <button class="tb-btn" id="tbStop" title="Stop selected download">
-          <div class="tb-icon icon-stop">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-          </div>
-          <span class="tb-label">Stop</span>
-        </button>
+      <button class="tb-btn" id="tbStop" title="Stop selected download (Ctrl+P)">
+        <div class="tb-icon icon-stop">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </div>
+        <span class="tb-label">Stop</span>
+      </button>
 
-        <button class="tb-btn" id="tbStopAll" title="Stop all downloading tasks">
-          <div class="tb-icon icon-stopall">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
-          </div>
-          <span class="tb-label">Stop All</span>
-        </button>
-      </div>
+      <button class="tb-btn" id="tbStopAll" title="Stop all downloading tasks">
+        <div class="tb-icon icon-stopall">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="1"></rect></svg>
+        </div>
+        <span class="tb-label">Stop All</span>
+      </button>
 
       <div class="tb-divider"></div>
 
-      <div class="tb-group modify-actions">
-        <button class="tb-btn" id="tbDelete" title="Delete selected download (Del)">
-          <div class="tb-icon icon-delete">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </div>
-          <span class="tb-label">Delete</span>
-        </button>
+      <button class="tb-btn" id="tbDelete" title="Delete selected download (Del)">
+        <div class="tb-icon icon-delete">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </div>
+        <span class="tb-label">Delete</span>
+      </button>
 
-        <button class="tb-btn" id="tbDeleteCompleted" title="Delete all completed tasks from list">
-          <div class="tb-icon icon-delete-comp">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          </div>
-          <span class="tb-label">Delete Compl.</span>
-        </button>
-      </div>
+      <button class="tb-btn" id="tbDeleteCompleted" title="Delete all completed tasks from list">
+        <div class="tb-icon icon-delete-comp">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <span class="tb-label">Delete Compl.</span>
+      </button>
 
       <div class="tb-divider"></div>
 
-      <div class="tb-group tool-actions">
-        <button class="tb-btn" id="tbOptions" title="Configuration options">
-          <div class="tb-icon icon-options">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          </div>
-          <span class="tb-label">Options</span>
-        </button>
+      <button class="tb-btn" id="tbOptions" title="Configuration options">
+        <div class="tb-icon icon-options">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <span class="tb-label">Options</span>
+      </button>
 
-        <button class="tb-btn" id="tbScheduler" title="Queue scheduler">
-          <div class="tb-icon icon-scheduler">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          </div>
-          <span class="tb-label">Scheduler</span>
-        </button>
+      <button class="tb-btn" id="tbScheduler" title="Queue scheduler">
+        <div class="tb-icon icon-scheduler">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <span class="tb-label">Scheduler</span>
+      </button>
 
-        <button class="tb-btn" id="tbStartQueue" title="Start downloading queue">
-          <div class="tb-icon icon-start-queue">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-          </div>
-          <span class="tb-label">Start Queue</span>
-        </button>
+      <button class="tb-btn" id="tbStartQueue" title="Start downloading queue">
+        <div class="tb-icon icon-start-queue">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+        </div>
+        <span class="tb-label">Start Queue</span>
+      </button>
 
-        <button class="tb-btn" id="tbStopQueue" title="Stop downloading queue">
-          <div class="tb-icon icon-stop-queue">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-          </div>
-          <span class="tb-label">Stop Queue</span>
-        </button>
+      <button class="tb-btn" id="tbStopQueue" title="Stop downloading queue">
+        <div class="tb-icon icon-stop-queue">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        </div>
+        <span class="tb-label">Stop Queue</span>
+      </button>
 
-        <button class="tb-btn" id="tbGrabber" title="Site Grabber">
-          <div class="tb-icon icon-grabber">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          </div>
-          <span class="tb-label">Grabber</span>
-        </button>
-      </div>
+      <button class="tb-btn" id="tbGrabber" title="Site Grabber">
+        <div class="tb-icon icon-grabber">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        </div>
+        <span class="tb-label">Grabber</span>
+      </button>
+
+      <div class="tb-divider"></div>
+
+      <!-- DIRECT ACCESS TO THE DOWNLOAD PROGRESS POP-UP -->
+      <button class="tb-btn tb-btn-status" id="tbDetails" title="Open Download Progress &amp; Telemetry Window (Enter)">
+        <div class="tb-icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        </div>
+        <span class="tb-label">Download Status</span>
+      </button>
     </div>
 
-    <!-- MAIN BODY: MODERN SPLIT SIDEBAR & CONTENT VIEW -->
+    <!-- MAIN BODY: NATIVE SPLIT SIDEBAR & LISTVIEW -->
     <div class="idm-main-content">
       
-      <!-- SLEEK MODERN SIDEBAR NAVIGATION -->
+      <!-- MINIMALIST WINDOWS SIDEBAR -->
       <aside class="idm-treeview-pane" role="tree" aria-label="Download Categories">
         <div class="tree-root">
-          <div class="sidebar-section-title">CATEGORIES</div>
+          <div class="sidebar-header">CATEGORIES</div>
           
           <div class="tree-node expanded">
             <div class="tree-item-row selected" data-cat="all" role="treeitem" tabindex="0">
-              <span class="sidebar-item-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span class="tree-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               </span>
               <span class="tree-text">All Downloads</span>
-              <span class="category-count-badge" id="countAll">0</span>
+              <span class="count-pill" id="countAll">0</span>
             </div>
 
             <div class="tree-children">
               <div class="tree-item-row" data-cat="compressed" role="treeitem" tabindex="0">
-                <span class="sidebar-item-icon cat-compressed">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <span class="tree-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
                 </span>
                 <span class="tree-text">Compressed</span>
-                <span class="category-count-badge" id="countCompressed">0</span>
+                <span class="count-pill" id="countCompressed">0</span>
               </div>
 
               <div class="tree-item-row" data-cat="documents" role="treeitem" tabindex="0">
-                <span class="sidebar-item-icon cat-documents">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span class="tree-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                 </span>
                 <span class="tree-text">Documents</span>
-                <span class="category-count-badge" id="countDocuments">0</span>
+                <span class="count-pill" id="countDocuments">0</span>
               </div>
 
               <div class="tree-item-row" data-cat="music" role="treeitem" tabindex="0">
-                <span class="sidebar-item-icon cat-music">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <span class="tree-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
                 </span>
                 <span class="tree-text">Music</span>
-                <span class="category-count-badge" id="countMusic">0</span>
+                <span class="count-pill" id="countMusic">0</span>
               </div>
 
               <div class="tree-item-row" data-cat="programs" role="treeitem" tabindex="0">
-                <span class="sidebar-item-icon cat-programs">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span class="tree-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                 </span>
                 <span class="tree-text">Programs</span>
-                <span class="category-count-badge" id="countPrograms">0</span>
+                <span class="count-pill" id="countPrograms">0</span>
               </div>
 
               <div class="tree-item-row" data-cat="video" role="treeitem" tabindex="0">
-                <span class="sidebar-item-icon cat-video">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                <span class="tree-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>
                 </span>
                 <span class="tree-text">Video</span>
-                <span class="category-count-badge" id="countVideo">0</span>
+                <span class="count-pill" id="countVideo">0</span>
               </div>
             </div>
           </div>
 
-          <div class="sidebar-section-title" style="margin-top: 14px;">STATUS</div>
+          <div class="sidebar-header" style="margin-top: 14px;">STATUS</div>
           
           <div class="tree-item-row" data-cat="unfinished" role="treeitem" tabindex="0">
-            <span class="sidebar-item-icon status-unfinished">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span class="tree-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </span>
             <span class="tree-text">Unfinished</span>
-            <span class="category-count-badge" id="countUnfinished">0</span>
+            <span class="count-pill" id="countUnfinished">0</span>
           </div>
 
           <div class="tree-item-row" data-cat="finished" role="treeitem" tabindex="0">
-            <span class="sidebar-item-icon status-finished">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span class="tree-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </span>
             <span class="tree-text">Finished</span>
-            <span class="category-count-badge" id="countFinished">0</span>
+            <span class="count-pill" id="countFinished">0</span>
           </div>
 
-          <div class="sidebar-section-title" style="margin-top: 14px;">QUEUES</div>
+          <div class="sidebar-header" style="margin-top: 14px;">QUEUES</div>
 
           <div class="tree-node expanded">
             <div class="tree-item-row" data-cat="queue" role="treeitem" tabindex="0">
-              <span class="sidebar-item-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              <span class="tree-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
               </span>
               <span class="tree-text">Queues</span>
             </div>
             <div class="tree-children">
               <div class="tree-item-row" data-cat="main-queue" role="treeitem" tabindex="0">
-                <span class="sidebar-item-bullet"></span>
-                <span class="tree-text">Main download queue</span>
+                <span class="tree-bullet">•</span>
+                <span class="tree-text">Main queue</span>
               </div>
               <div class="tree-item-row" data-cat="sync-queue" role="treeitem" tabindex="0">
-                <span class="sidebar-item-bullet"></span>
-                <span class="tree-text">Synchronization queue</span>
+                <span class="tree-bullet">•</span>
+                <span class="tree-text">Sync queue</span>
               </div>
             </div>
           </div>
@@ -239,27 +356,25 @@
       <!-- RESIZER BAR -->
       <div class="idm-resizer" id="treeResizer" title="Drag to resize category pane"></div>
 
-      <!-- MODERN DATA TABLE WITH SEARCH & FILTER BAR -->
+      <!-- CLEAN LISTVIEW TABLE -->
       <main class="idm-listview-pane">
-        <!-- Modern Floating Filter & Search Header Bar -->
+        <!-- Compact Filter Bar -->
         <div class="idm-filter-bar">
           <div class="filter-left">
-            <div class="search-input-wrap">
-              <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="searchFilterInput" class="filter-search-input" placeholder="Search file name, extension, or URL...">
+            <div class="search-box">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="searchFilterInput" placeholder="Filter by name or URL...">
             </div>
 
-            <div class="select-input-wrap">
-              <select id="statusFilterSelect" class="filter-status-select" aria-label="Filter by status">
-                <option value="all">Status: All</option>
-                <option value="downloading">Downloading</option>
-                <option value="paused">Paused / Queued</option>
-                <option value="completed">Completed</option>
-                <option value="error">Error</option>
-              </select>
-            </div>
+            <select id="statusFilterSelect" aria-label="Filter by status">
+              <option value="all">All Status</option>
+              <option value="downloading">Downloading</option>
+              <option value="paused">Paused / Queued</option>
+              <option value="completed">Completed</option>
+              <option value="error">Errors</option>
+            </select>
 
-            <button class="btn-ghost-sm" id="clearFilterBtn" title="Reset search and status filters">Reset</button>
+            <button class="win-btn-ghost" id="clearFilterBtn" title="Reset filters">Reset</button>
           </div>
           
           <div class="filter-right" id="activeFilterSummary">Showing all tasks</div>
@@ -272,22 +387,22 @@
                 <th class="col-name sortable-th" data-sort="filename" style="width: 250px;">
                   File Name <span class="sort-indicator" id="sort-filename"></span>
                 </th>
-                <th class="col-size sortable-th" data-sort="totalBytes" style="width: 90px;">
+                <th class="col-size sortable-th" data-sort="totalBytes" style="width: 85px;">
                   Size <span class="sort-indicator" id="sort-totalBytes"></span>
                 </th>
                 <th class="col-status sortable-th" data-sort="status" style="width: 140px;">
                   Status <span class="sort-indicator" id="sort-status"></span>
                 </th>
-                <th class="col-time sortable-th" data-sort="timeLeft" style="width: 90px;">
+                <th class="col-time sortable-th" data-sort="timeLeft" style="width: 85px;">
                   Time left <span class="sort-indicator" id="sort-timeLeft"></span>
                 </th>
-                <th class="col-speed sortable-th" data-sort="speed" style="width: 110px;">
+                <th class="col-speed sortable-th" data-sort="speed" style="width: 100px;">
                   Transfer rate <span class="sort-indicator" id="sort-speed"></span>
                 </th>
-                <th class="col-date sortable-th" data-sort="addedAt" style="width: 110px;">
+                <th class="col-date sortable-th" data-sort="addedAt" style="width: 100px;">
                   Date Added <span class="sort-indicator" id="sort-addedAt"></span>
                 </th>
-                <th class="col-desc">Integrity &amp; Details</th>
+                <th class="col-desc">Details &amp; Action</th>
               </tr>
             </thead>
             <tbody id="downloadsTableBody">
@@ -298,7 +413,7 @@
       </main>
     </div>
 
-    <!-- MODERN STATUS FOOTER -->
+    <!-- WINDOWS STATUS FOOTER -->
     <footer class="idm-statusbar">
       <div class="status-panel panel-left" id="sbTaskCount">0 downloads</div>
       <div class="status-panel panel-mid" id="sbSpeed">Speed: 0.00 KB/sec</div>
@@ -308,16 +423,14 @@
   </div>
 
   <!-- ========================================================
-       MODERN DOWNLOAD STATUS & TELEMETRY MODAL
+       THE DOWNLOAD PROGRESS & TELEMETRY POP-UP WINDOW
        ======================================================== -->
   <div class="modal-backdrop" id="downloadDialogModal" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
-    <div class="idm-dialog-window">
+    <div class="idm-dialog-window" style="width: 530px;">
       <!-- Title bar -->
       <div class="dialog-titlebar">
         <div class="dialog-title-left">
-          <div class="dlg-title-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          </div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           <span class="title-text" id="dlgTitle">0% — Personal IDM</span>
         </div>
         <button class="dialog-close-btn" id="dlgCloseBtn" aria-label="Close dialog">✕</button>
@@ -332,38 +445,35 @@
         </div>
 
         <div class="dialog-tab-content" id="tabPaneStatus">
-          <!-- Modern Metrics Cards Grid -->
-          <div class="telemetry-grid">
-            <div class="telemetry-card">
-              <span class="telemetry-lbl">Transfer Rate</span>
-              <span class="telemetry-val highlight-speed tabular-nums" id="dlgTransferRate">0.00 KB/sec</span>
-            </div>
-            <div class="telemetry-card">
-              <span class="telemetry-lbl">Time Left</span>
-              <span class="telemetry-val tabular-nums" id="dlgTimeLeft">—</span>
-            </div>
-            <div class="telemetry-card">
-              <span class="telemetry-lbl">Downloaded</span>
-              <span class="telemetry-val tabular-nums" id="dlgDownloaded">0.00 KB (0.00%)</span>
-            </div>
-            <div class="telemetry-card">
-              <span class="telemetry-lbl">File Size</span>
-              <span class="telemetry-val tabular-nums" id="dlgFileSize">0.00 KB</span>
-            </div>
-          </div>
-
-          <div class="dlg-info-table" style="margin-top: 12px;">
+          <!-- Real-time Metrics Grid -->
+          <div class="dlg-info-table">
             <div class="dlg-row">
               <span class="dlg-lbl">Status:</span>
-              <span class="dlg-val highlight-blue" id="dlgStatusText">Connecting...</span>
+              <span class="dlg-val highlight-blue" id="dlgStatusText">Connecting to server...</span>
             </div>
             <div class="dlg-row">
-              <span class="dlg-lbl">Range Acceleration:</span>
+              <span class="dlg-lbl">File size:</span>
+              <span class="dlg-val tabular-nums" id="dlgFileSize">0.00 KB</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Downloaded:</span>
+              <span class="dlg-val tabular-nums" id="dlgDownloaded">0.00 KB (0.00%)</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Transfer rate:</span>
+              <span class="dlg-val highlight-speed tabular-nums" id="dlgTransferRate">0.00 KB/sec</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Time left:</span>
+              <span class="dlg-val tabular-nums" id="dlgTimeLeft">—</span>
+            </div>
+            <div class="dlg-row">
+              <span class="dlg-lbl">Resume capability:</span>
               <span class="dlg-val dlg-resume-val" id="dlgResumeCap">Yes</span>
             </div>
           </div>
 
-          <!-- MODERN PROGRESS BAR WITH GLOW -->
+          <!-- WINDOWS NATIVE PROGRESS BAR -->
           <div class="idm-pbar-wrapper">
             <div class="idm-pbar-sunken">
               <div class="idm-pbar-fill" id="dlgProgressBar" style="width: 0%;"></div>
@@ -371,10 +481,10 @@
             <div class="idm-pbar-text tabular-nums" id="dlgPercentLabel">0%</div>
           </div>
 
-          <!-- MULTI-THREAD CONNECTION SEGMENTS PROGRESS -->
+          <!-- DYNAMIC CONNECTION SEGMENTS TRACKER -->
           <div class="idm-segments-box">
             <div class="segments-title-row">
-              <span class="seg-title">Dynamic Work-Stealing Range Connections:</span>
+              <span>Dynamic Work-Stealing Range Connections:</span>
               <span class="seg-badge" id="dlgConnCount">8 connections</span>
             </div>
             <div class="segments-canvas-sunken" id="dlgSegmentsGrid">
@@ -394,7 +504,7 @@
               <span class="dlg-val mono-val" id="dlgInfoPath">—</span>
             </div>
             <div class="dlg-row">
-              <span class="dlg-lbl">Continuity Tag:</span>
+              <span class="dlg-lbl">ETag Validator:</span>
               <span class="dlg-val" id="dlgInfoEtag">—</span>
             </div>
             <div class="dlg-row">
@@ -404,28 +514,25 @@
           </div>
         </div>
 
-        <!-- Dialog Bottom Push-buttons -->
+        <!-- Push-buttons -->
         <div class="dialog-button-bar">
-          <button class="btn-modern btn-secondary" id="dlgPauseResumeBtn">Pause</button>
-          <button class="btn-modern btn-secondary" id="dlgCancelBtn">Cancel</button>
-          <button class="btn-modern btn-primary" id="dlgOpenFileBtn" style="display: none;">Open File</button>
-          <button class="btn-modern btn-secondary" id="dlgOpenFolderBtn">Open Folder</button>
-          <button class="btn-modern btn-ghost" id="dlgHideBtn">Hide</button>
+          <button class="win-btn" id="dlgPauseResumeBtn">Pause</button>
+          <button class="win-btn" id="dlgCancelBtn">Cancel</button>
+          <button class="win-btn win-btn-accent" id="dlgOpenFileBtn" style="display: none;">Open File</button>
+          <button class="win-btn" id="dlgOpenFolderBtn">Open Folder</button>
+          <button class="win-btn" id="dlgHideBtn">Hide</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================
-       MODERN "ADD NEW DOWNLOAD" DIALOG
+       "ADD NEW DOWNLOAD" DIALOG
        ======================================================== -->
   <div class="modal-backdrop" id="addUrlDialogModal" role="dialog" aria-modal="true" aria-labelledby="addUrlDlgTitle">
-    <div class="idm-dialog-window" style="width: 520px;">
+    <div class="idm-dialog-window" style="width: 500px;">
       <div class="dialog-titlebar">
         <div class="dialog-title-left">
-          <div class="dlg-title-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </div>
           <span class="title-text" id="addUrlDlgTitle">Add New Download</span>
         </div>
         <button class="dialog-close-btn" id="addUrlDlgClose" aria-label="Close">✕</button>
@@ -436,68 +543,65 @@
           <div class="form-field">
             <label for="newUrlInput">Download URL (HTTP/HTTPS):</label>
             <div class="field-with-btn">
-              <input type="text" id="newUrlInput" class="modern-input" placeholder="https://example.com/archive.zip" autofocus>
-              <button class="btn-modern btn-secondary-sm" id="btnPasteUrl">Paste</button>
+              <input type="text" id="newUrlInput" class="win-input" placeholder="https://example.com/archive.zip" autofocus>
+              <button class="win-btn" id="btnPasteUrl">Paste</button>
             </div>
           </div>
 
           <div class="url-probe-box" id="urlProbeBox" style="display: none;">
-            <div class="probe-line"><b>File Name:</b> <span id="probeFn">—</span></div>
-            <div class="probe-line"><b>Size:</b> <span id="probeSize">—</span></div>
-            <div class="probe-line"><b>Acceleration:</b> <span id="probeResume">—</span></div>
+            <div><b>Detected Name:</b> <span id="probeFn">—</span></div>
+            <div><b>Size:</b> <span id="probeSize">—</span></div>
+            <div><b>Acceleration Support:</b> <span id="probeResume">—</span></div>
           </div>
 
           <div class="form-field">
-            <label for="savePathInput">Destination Directory:</label>
+            <label for="savePathInput">Save To Directory:</label>
             <div class="field-with-btn">
-              <input type="text" id="savePathInput" class="modern-input" readonly>
-              <button class="btn-modern btn-secondary-sm" id="btnBrowseDir">Browse...</button>
+              <input type="text" id="savePathInput" class="win-input" readonly>
+              <button class="win-btn" id="btnBrowseDir">Browse...</button>
             </div>
           </div>
 
           <div class="form-row-2">
-            <div class="form-field flex-1">
+            <div class="form-field" style="flex: 1;">
               <label for="customFilenameInput">File Name (Optional):</label>
-              <input type="text" id="customFilenameInput" class="modern-input" placeholder="Auto-detected from server">
+              <input type="text" id="customFilenameInput" class="win-input" placeholder="Auto-detected">
             </div>
-            <div class="form-field" style="width: 160px;">
+            <div class="form-field" style="width: 140px;">
               <label for="selectThreads">Connections:</label>
-              <select id="selectThreads" class="modern-select">
-                <option value="1">1 connection</option>
-                <option value="4">4 connections</option>
-                <option value="8" selected>8 connections</option>
-                <option value="16">16 connections</option>
-                <option value="32">32 connections</option>
+              <select id="selectThreads" class="win-select">
+                <option value="1">1 thread</option>
+                <option value="4">4 threads</option>
+                <option value="8" selected>8 threads</option>
+                <option value="16">16 threads</option>
+                <option value="32">32 threads</option>
               </select>
             </div>
           </div>
 
           <div class="form-field">
             <label for="expectedSha256Input">Expected SHA-256 Checksum (Optional):</label>
-            <input type="text" id="expectedSha256Input" class="modern-input" placeholder="64-character hex digest for verification">
+            <input type="text" id="expectedSha256Input" class="win-input" placeholder="Optional 64-hex integrity digest">
           </div>
         </div>
 
-        <div class="dialog-button-bar" style="margin-top: 16px;">
-          <button class="btn-modern btn-primary" id="btnStartDownload">Download Now</button>
-          <button class="btn-modern btn-secondary" id="btnDownloadLater">Download Later</button>
-          <button class="btn-modern btn-ghost" id="btnCancelAdd">Cancel</button>
+        <div class="dialog-button-bar" style="margin-top: 14px;">
+          <button class="win-btn win-btn-accent" id="btnStartDownload">Download Now</button>
+          <button class="win-btn" id="btnDownloadLater">Download Later</button>
+          <button class="win-btn" id="btnCancelAdd">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================
-       MODERN SETTINGS / OPTIONS CONFIGURATION DIALOG
+       OPTIONS / SETTINGS DIALOG
        ======================================================== -->
   <div class="modal-backdrop" id="optionsDialogModal" role="dialog" aria-modal="true" aria-labelledby="optDlgTitle">
     <div class="idm-dialog-window" style="width: 530px;">
       <div class="dialog-titlebar">
         <div class="dialog-title-left">
-          <div class="dlg-title-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          </div>
-          <span class="title-text" id="optDlgTitle">Personal IDM Configuration</span>
+          <span class="title-text" id="optDlgTitle">Personal IDM Settings</span>
         </div>
         <button class="dialog-close-btn" id="optionsCloseBtn" aria-label="Close">✕</button>
       </div>
@@ -510,102 +614,106 @@
         </div>
 
         <div class="dialog-tab-content" id="optPaneGeneral">
-          <div class="settings-group">
-            <h4 class="settings-group-title">Default Download Location</h4>
+          <div class="win-card">
+            <div class="win-card-title">Default Save Location</div>
             <div class="form-field">
-              <label for="optSaveDir">Default directory for new downloads:</label>
+              <label for="optSaveDir">Default folder for newly added downloads:</label>
               <div class="field-with-btn">
-                <input type="text" id="optSaveDir" class="modern-input" readonly>
-                <button class="btn-modern btn-secondary-sm" id="optBrowseBtn">Browse...</button>
+                <input type="text" id="optSaveDir" class="win-input" readonly>
+                <button class="win-btn" id="optBrowseBtn">Browse...</button>
               </div>
-              <span class="field-hint">Changes apply to newly enqueued tasks without moving existing files.</span>
+              <span class="field-hint">Changes apply to new downloads without altering finished tasks.</span>
             </div>
           </div>
 
-          <div class="settings-group" style="margin-top: 14px;">
-            <h4 class="settings-group-title">Queue Concurrency</h4>
+          <div class="win-card" style="margin-top: 10px;">
+            <div class="win-card-title">Queue &amp; Pop-up Automation</div>
             <div class="form-field">
-              <label for="optMaxConcurrent">Maximum simultaneous active downloads (1–10):</label>
-              <select id="optMaxConcurrent" class="modern-select" style="width: 180px;">
-                <option value="1">1 task at a time</option>
+              <label for="optMaxConcurrent">Maximum concurrent active downloads (1–10):</label>
+              <select id="optMaxConcurrent" class="win-select" style="width: 160px;">
+                <option value="1">1 at a time</option>
                 <option value="2">2 tasks</option>
                 <option value="3" selected>3 tasks (Recommended)</option>
                 <option value="5">5 tasks</option>
                 <option value="8">8 tasks</option>
                 <option value="10">10 tasks</option>
               </select>
-              <span class="field-hint">Excess tasks wait in the queue and start automatically as active downloads finish.</span>
+              <span class="field-hint">Additional tasks wait in queue and begin automatically as active downloads finish.</span>
+            </div>
+
+            <div class="form-field" style="margin-top: 8px;">
+              <label class="win-checkbox-label">
+                <input type="checkbox" id="optAutoShowPopup" checked>
+                <span>Automatically open the Download Progress pop-up window when a download starts</span>
+              </label>
             </div>
           </div>
         </div>
 
         <div class="dialog-tab-content" id="optPaneConn" style="display: none;">
-          <div class="settings-group">
-            <h4 class="settings-group-title">Segmented Acceleration Connections</h4>
+          <div class="win-card">
+            <div class="win-card-title">Multi-Segment Acceleration</div>
             <div class="form-field">
-              <label for="optDefaultConn">Default max connections per file (1–32):</label>
-              <select id="optDefaultConn" class="modern-select" style="width: 200px;">
+              <label for="optDefaultConn">Default connections per download (1–32):</label>
+              <select id="optDefaultConn" class="win-select" style="width: 180px;">
                 <option value="1">1 (Single stream)</option>
                 <option value="4">4 connections</option>
                 <option value="8" selected>8 connections (Standard)</option>
                 <option value="16">16 connections (High speed)</option>
                 <option value="32">32 connections (Maximum)</option>
               </select>
-              <span class="field-hint">Dynamically splits slow range segments using cooperative work-stealing.</span>
+              <span class="field-hint">Uses dynamic work-stealing segmentation on servers supporting HTTP Range headers.</span>
             </div>
           </div>
 
-          <div class="settings-group" style="margin-top: 14px;">
-            <h4 class="settings-group-title">Bandwidth Rate Limiter</h4>
+          <div class="win-card" style="margin-top: 10px;">
+            <div class="win-card-title">Bandwidth Rate Limiter</div>
             <div class="form-field">
               <label for="optSpeedLimit">Global download speed cap (KB/sec, 0 = Unlimited):</label>
-              <input type="number" id="optSpeedLimit" class="modern-input" min="0" step="64" value="0" style="width: 200px;">
-              <span class="field-hint">Enforces smooth token-bucket rate limiting across active connections. Set to 0 for unlimited speed.</span>
+              <input type="number" id="optSpeedLimit" class="win-input" min="0" step="64" value="0" style="width: 180px;">
+              <span class="field-hint">Enforces smooth token-bucket rate limiting across all active transfers. Set to 0 for unlimited speed.</span>
             </div>
           </div>
         </div>
 
         <div class="dialog-tab-content" id="optPaneBridge" style="display: none;">
-          <div class="settings-group">
-            <h4 class="settings-group-title">Authenticated Loopback Integration Bridge</h4>
+          <div class="win-card">
+            <div class="win-card-title">Authenticated Loopback Integration Bridge</div>
             <div class="dlg-info-table">
               <div class="dlg-row">
-                <span class="dlg-lbl">Active Loopback Endpoint:</span>
+                <span class="dlg-lbl">Loopback Endpoint:</span>
                 <span class="dlg-val"><code id="optActivePortLabel">127.0.0.1:1001</code></span>
               </div>
               <div class="dlg-row">
-                <span class="dlg-lbl">Protocol Security:</span>
-                <span class="dlg-val">Bearer Token + Origin Allowlist (No wildcard *)</span>
+                <span class="dlg-lbl">Security Model:</span>
+                <span class="dlg-val">256-bit Bearer Token + Browser Origin Validation</span>
               </div>
               <div class="dlg-row">
-                <span class="dlg-lbl">Port Auto-Failover:</span>
+                <span class="dlg-lbl">Port Failover:</span>
                 <span class="dlg-val">Auto-probes <code>1001</code>, <code>10010</code>–<code>10014</code></span>
               </div>
             </div>
-            <p class="field-hint" style="margin-top: 10px;">
-              The Chrome/Edge extension in <code>browser-extension/</code> automatically discovers the active port via <code>/api/v1/discovery</code> and performs an authenticated handshake via <code>/api/v1/handshake</code>.
+            <p class="field-hint" style="margin-top: 8px;">
+              The Chrome/Edge extension in <code>browser-extension/</code> automatically discovers the active port via <code>/api/v1/discovery</code> and handshakes via <code>/api/v1/handshake</code>.
             </p>
           </div>
         </div>
 
-        <div class="dialog-button-bar" style="margin-top: 16px;">
-          <button class="btn-modern btn-primary" id="optSaveBtn">Save Changes</button>
-          <button class="btn-modern btn-ghost" id="optCancelBtn">Cancel</button>
+        <div class="dialog-button-bar" style="margin-top: 14px;">
+          <button class="win-btn win-btn-accent" id="optSaveBtn">Save Changes</button>
+          <button class="win-btn" id="optCancelBtn">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================
-       MODERN SCHEDULER DIALOG
+       SCHEDULER DIALOG
        ======================================================== -->
   <div class="modal-backdrop" id="schedulerDialogModal" role="dialog" aria-modal="true" aria-labelledby="schedDlgTitle">
-    <div class="idm-dialog-window" style="width: 500px;">
+    <div class="idm-dialog-window" style="width: 480px;">
       <div class="dialog-titlebar">
         <div class="dialog-title-left">
-          <div class="dlg-title-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          </div>
           <span class="title-text" id="schedDlgTitle">Download Scheduler — Queue &amp; Timed Automation</span>
         </div>
         <button class="dialog-close-btn" id="schedulerCloseBtn" aria-label="Close">✕</button>
@@ -613,42 +721,38 @@
 
       <div class="dialog-inner">
         <div class="info-notice-banner">
-          <span class="badge-status-dot"></span>
           <b>Status:</b> Timed Scheduling Not Yet Implemented in Current Build
         </div>
 
-        <div class="settings-group">
-          <h4 class="settings-group-title">Intended Feature Purpose</h4>
+        <div class="win-card">
+          <div class="win-card-title">Intended Feature Purpose</div>
           <p class="info-paragraph">
             The <b>IDM Scheduler</b> is designed for scheduling downloads and managing timed download queues automatically:
           </p>
           <ul class="info-feature-list">
             <li>Start and stop download queues at scheduled clock times or days of the week.</li>
             <li>Limit active concurrent downloads per queue and retry failed transfers automatically.</li>
-            <li>Perform post-completion actions (such as hanging up network connections or exiting Personal IDM).</li>
+            <li>Perform post-completion actions (such as disconnecting network or exiting Personal IDM).</li>
           </ul>
-          <p class="info-paragraph" style="margin-top: 10px;">
+          <p class="info-paragraph" style="margin-top: 8px;">
             <b>Current Availability:</b> Automated time-based triggers are not yet enabled. You can manually start and stop the active download queue at any time using the <b>Start Queue</b> and <b>Stop Queue</b> buttons on the main toolbar.
           </p>
         </div>
 
-        <div class="dialog-button-bar" style="margin-top: 16px;">
-          <button class="btn-modern btn-primary" id="schedulerOkBtn">Got it</button>
+        <div class="dialog-button-bar" style="margin-top: 14px;">
+          <button class="win-btn win-btn-accent" id="schedulerOkBtn">OK</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ========================================================
-       MODERN SITE GRABBER DIALOG
+       SITE GRABBER DIALOG
        ======================================================== -->
   <div class="modal-backdrop" id="grabberDialogModal" role="dialog" aria-modal="true" aria-labelledby="grabberDlgTitle">
-    <div class="idm-dialog-window" style="width: 500px;">
+    <div class="idm-dialog-window" style="width: 480px;">
       <div class="dialog-titlebar">
         <div class="dialog-title-left">
-          <div class="dlg-title-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          </div>
           <span class="title-text" id="grabberDlgTitle">IDM Site Grabber — Website Resource Collector</span>
         </div>
         <button class="dialog-close-btn" id="grabberCloseBtn" aria-label="Close">✕</button>
@@ -656,12 +760,11 @@
 
       <div class="dialog-inner">
         <div class="info-notice-banner">
-          <span class="badge-status-dot"></span>
           <b>Status:</b> Website Crawling Not Yet Implemented in Current Build
         </div>
 
-        <div class="settings-group">
-          <h4 class="settings-group-title">Intended Feature Purpose</h4>
+        <div class="win-card">
+          <div class="win-card-title">Intended Feature Purpose</div>
           <p class="info-paragraph">
             The <b>IDM Site Grabber</b> is intended for collecting downloadable resources from websites using customizable link-following and file-type filters:
           </p>
@@ -670,13 +773,39 @@
             <li>Collect all matching audio, video, archive, image, or document assets for batch queuing.</li>
             <li>Mirror website directory structures for offline browsing.</li>
           </ul>
-          <p class="info-paragraph" style="margin-top: 10px;">
+          <p class="info-paragraph" style="margin-top: 8px;">
             <b>Current Availability:</b> Full multi-page website crawling is not yet available. To download direct file links immediately, click <b>Add URL</b> on the toolbar or use the <b>Personal IDM Browser Extension</b> context menu.
           </p>
         </div>
 
-        <div class="dialog-button-bar" style="margin-top: 16px;">
-          <button class="btn-modern btn-primary" id="grabberOkBtn">Got it</button>
+        <div class="dialog-button-bar" style="margin-top: 14px;">
+          <button class="win-btn win-btn-accent" id="grabberOkBtn">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       ABOUT DIALOG
+       ======================================================== -->
+  <div class="modal-backdrop" id="aboutDialogModal" role="dialog" aria-modal="true" aria-labelledby="aboutDlgTitle">
+    <div class="idm-dialog-window" style="width: 420px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <span class="title-text" id="aboutDlgTitle">About Personal IDM</span>
+        </div>
+        <button class="dialog-close-btn" id="aboutCloseBtn" aria-label="Close">✕</button>
+      </div>
+      <div class="dialog-inner">
+        <div class="win-card" style="text-align: center; padding: 20px;">
+          <h3 style="margin-bottom: 4px; font-weight: 600;">Personal IDM</h3>
+          <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">Version 1.0 — Desktop Download Accelerator</p>
+          <p style="font-size: 12.5px; line-height: 1.5; color: var(--text-secondary);">
+            High-performance segmented multi-threaded download engine with cooperative work-stealing, strict TLS validation, and Chrome/Edge browser integration.
+          </p>
+        </div>
+        <div class="dialog-button-bar">
+          <button class="win-btn win-btn-accent" id="aboutOkBtn">Close</button>
         </div>
       </div>
     </div>
