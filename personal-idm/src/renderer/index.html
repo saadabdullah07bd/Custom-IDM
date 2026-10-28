@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,15 +11,9 @@
   <!-- MAIN WINDOW -->
   <div class="idm-window">
     
-    <!-- MINIMALIST APP HEADER -->
+    <!-- CUSTOM FRAMELESS TITLEBAR (DRAGGABLE WITH CUSTOM WINDOW CONTROLS) -->
     <header class="win-header">
       <div class="win-title-strip">
-        <button class="win-icon-btn" id="btnToggleSidebar" title="Toggle Categories Panel (Ctrl+B)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="9" y1="3" x2="9" y2="21"></line>
-          </svg>
-        </button>
         <div class="win-app-identity">
           <svg class="win-app-logo" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -29,34 +23,41 @@
           <span class="win-app-title">Personal IDM</span>
         </div>
       </div>
+
+      <!-- Custom Window Controls: Minimize, Maximize/Restore, Close -->
+      <div class="win-window-controls">
+        <button class="win-control-btn" id="winBtnMin" title="Minimize">—</button>
+        <button class="win-control-btn" id="winBtnMax" title="Maximize">□</button>
+        <button class="win-control-btn close" id="winBtnClose" title="Close">✕</button>
+      </div>
     </header>
 
-    <!-- CLEAN COMMAND BAR (TOOLBAR - PRESERVING EXACT REQUIRED ORDER) -->
+    <!-- CLEAN COMMAND BAR (TOOLBAR - PRESERVING EXACT REQUIRED ORDER & SPRITES) -->
     <div class="idm-toolbar" role="toolbar" aria-label="Main Download Actions">
       <button class="tb-btn tb-btn-accent" id="tbAddUrl" title="Add new download URL (Insert)">
         <div class="tb-icon icon-add">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </div>
         <span class="tb-label">Add URL</span>
       </button>
 
       <button class="tb-btn" id="tbResume" title="Resume selected download (Ctrl+R)">
         <div class="tb-icon icon-resume">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         </div>
         <span class="tb-label">Resume</span>
       </button>
 
       <button class="tb-btn" id="tbStop" title="Stop selected download (Ctrl+P)">
         <div class="tb-icon icon-stop">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         </div>
         <span class="tb-label">Stop</span>
       </button>
 
       <button class="tb-btn" id="tbStopAll" title="Stop all downloading tasks">
         <div class="tb-icon icon-stopall">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="1"></rect></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="1"></rect></svg>
         </div>
         <span class="tb-label">Stop All</span>
       </button>
@@ -65,14 +66,14 @@
 
       <button class="tb-btn" id="tbDelete" title="Delete selected download (Del)">
         <div class="tb-icon icon-delete">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </div>
         <span class="tb-label">Delete</span>
       </button>
 
       <button class="tb-btn" id="tbDeleteCompleted" title="Delete all completed tasks from list">
         <div class="tb-icon icon-delete-comp">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
         <span class="tb-label">Delete Compl.</span>
       </button>
@@ -81,35 +82,35 @@
 
       <button class="tb-btn" id="tbOptions" title="Configuration options">
         <div class="tb-icon icon-options">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
         <span class="tb-label">Options</span>
       </button>
 
       <button class="tb-btn" id="tbScheduler" title="Queue scheduler">
         <div class="tb-icon icon-scheduler">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <span class="tb-label">Scheduler</span>
       </button>
 
       <button class="tb-btn" id="tbStartQueue" title="Start downloading queue">
         <div class="tb-icon icon-start-queue">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
         </div>
         <span class="tb-label">Start Queue</span>
       </button>
 
       <button class="tb-btn" id="tbStopQueue" title="Stop downloading queue">
         <div class="tb-icon icon-stop-queue">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         </div>
         <span class="tb-label">Stop Queue</span>
       </button>
 
       <button class="tb-btn" id="tbGrabber" title="Site Grabber">
         <div class="tb-icon icon-grabber">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
         </div>
         <span class="tb-label">Grabber</span>
       </button>
@@ -122,7 +123,7 @@
       <aside class="idm-treeview-pane" id="categoriesSidebar" role="tree" aria-label="Download Categories">
         <div class="tree-header">
           <span class="tree-header-title">Categories</span>
-          <button class="win-icon-btn-sm" id="btnCollapseSidebar" title="Hide Categories">✕</button>
+          <button class="sidebar-collapse-btn" id="btnCollapseSidebar" title="Hide Categories Panel">◀</button>
         </div>
         <div class="tree-root">
           <div class="tree-item-row selected" data-cat="all">
@@ -174,6 +175,11 @@
         </div>
       </aside>
 
+      <!-- COLLAPSED SIDEBAR EXPANDER BUTTON -->
+      <div class="sidebar-expand-tab" id="btnExpandSidebar" title="Show Categories">
+        <span>▶</span>
+      </div>
+
       <!-- MAIN DOWNLOADS LIST VIEW -->
       <main class="idm-listview-pane">
         
@@ -181,7 +187,7 @@
         <div class="win-command-bar">
           <div class="search-input-wrap">
             <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchFilterInput" class="search-input" placeholder="Search downloads (filename or URL)..." />
+            <input type="text" id="searchFilterInput" class="search-input" placeholder="Search downloads..." />
           </div>
           <div class="filter-actions">
             <select id="statusFilterSelect" class="filter-select">
@@ -191,7 +197,7 @@
               <option value="completed">Completed</option>
               <option value="error">Error</option>
             </select>
-            <button class="win-btn win-btn-sm" id="clearFilterBtn">Reset Filter</button>
+            <button class="win-btn win-btn-sm" id="clearFilterBtn">Reset</button>
           </div>
         </div>
 
@@ -200,25 +206,24 @@
           <table class="idm-table" id="downloadsTable">
             <thead>
               <tr>
-                <th class="sortable-th" data-sort="filename" style="width: 32%;">
+                <th class="sortable-th" data-sort="filename" style="width: 38%;">
                   File Name <span class="sort-indicator" id="sort-filename"></span>
                 </th>
-                <th class="sortable-th" data-sort="totalBytes" style="width: 10%;">
+                <th class="sortable-th" data-sort="totalBytes" style="width: 11%;">
                   Size <span class="sort-indicator" id="sort-totalBytes"></span>
                 </th>
                 <th class="sortable-th" data-sort="status" style="width: 15%;">
                   Status <span class="sort-indicator" id="sort-status"></span>
                 </th>
-                <th class="sortable-th" data-sort="timeLeft" style="width: 11%;">
+                <th class="sortable-th" data-sort="timeLeft" style="width: 12%;">
                   Time Left <span class="sort-indicator" id="sort-timeLeft"></span>
                 </th>
                 <th class="sortable-th" data-sort="speed" style="width: 12%;">
-                  Transfer Rate <span class="sort-indicator" id="sort-speed"></span>
+                  Speed <span class="sort-indicator" id="sort-speed"></span>
                 </th>
-                <th class="sortable-th" data-sort="addedAt" style="width: 10%;">
+                <th class="sortable-th" data-sort="addedAt" style="width: 12%;">
                   Date Added <span class="sort-indicator" id="sort-addedAt">▼</span>
                 </th>
-                <th style="width: 10%;">Details</th>
               </tr>
             </thead>
             <tbody id="downloadsTableBody">
@@ -227,6 +232,36 @@
           </table>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       CUSTOM DELETE CONFIRMATION MODAL (MATCHES UI THEME)
+       ======================================================== -->
+  <div class="modal-backdrop" id="deleteConfirmModal" role="dialog" aria-modal="true" aria-labelledby="delDlgTitle">
+    <div class="idm-dialog-window" style="width: 440px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-title-left">
+          <span class="title-text" id="delDlgTitle">Confirm Delete</span>
+        </div>
+        <button class="dialog-close-btn" id="delDlgClose" aria-label="Close">✕</button>
+      </div>
+      <div class="dialog-inner">
+        <p style="font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">
+          Are you sure you want to remove this download?
+        </p>
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; font-weight: 600; font-size: 12.5px; word-break: break-all;" id="delFilenameDisplay">
+          filename.zip
+        </div>
+        <label style="margin-top: 12px; font-size: 12px; display: flex; align-items: center; gap: 7px; color: var(--text-secondary); cursor: pointer;">
+          <input type="checkbox" id="chkDeleteDiskFile">
+          <span>Also delete downloaded file from disk</span>
+        </label>
+        <div class="dialog-button-bar" style="margin-top: 16px;">
+          <button class="win-btn win-btn-accent" id="btnConfirmDelete" style="background-color: var(--color-danger); border-color: var(--color-danger);">Delete</button>
+          <button class="win-btn" id="btnCancelDelete">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -418,8 +453,8 @@
             <div class="form-field">
               <label for="optThemeSelect">Application Theme:</label>
               <select id="optThemeSelect" class="win-select" style="width: 180px;">
-                <option value="light" selected>Light Theme</option>
-                <option value="dark">Dark Theme</option>
+                <option value="dark" selected>Dark Theme</option>
+                <option value="light">Light Theme</option>
               </select>
             </div>
           </div>

@@ -37,11 +37,19 @@ const optionsDialogModal = document.getElementById('optionsDialogModal');
 const schedulerDialogModal = document.getElementById('schedulerDialogModal');
 const grabberDialogModal = document.getElementById('grabberDialogModal');
 const aboutDialogModal = document.getElementById('aboutDialogModal');
+const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+const delFilenameDisplay = document.getElementById('delFilenameDisplay');
+const chkDeleteDiskFile = document.getElementById('chkDeleteDiskFile');
+const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+const btnCancelDelete = document.getElementById('btnCancelDelete');
+const delDlgClose = document.getElementById('delDlgClose');
+let pendingDeleteTaskId = null;
 
 // Sidebar
 const mainContent = document.getElementById('idmMainContent');
 const btnToggleSidebar = document.getElementById('btnToggleSidebar');
 const btnCollapseSidebar = document.getElementById('btnCollapseSidebar');
+const btnExpandSidebar = document.getElementById('btnExpandSidebar');
 
 // ========================================================
 // FORMAT HELPERS
@@ -151,6 +159,17 @@ async function init() {
   if (btnCollapseSidebar) {
     btnCollapseSidebar.addEventListener('click', toggleSidebar);
   }
+  if (btnExpandSidebar) {
+    btnExpandSidebar.addEventListener('click', toggleSidebar);
+  }
+
+  // Frameless window controls
+  const winMin = document.getElementById('winBtnMin');
+  const winMax = document.getElementById('winBtnMax');
+  const winClose = document.getElementById('winBtnClose');
+  if (winMin) winMin.addEventListener('click', () => window.api.minimizeWindow?.());
+  if (winMax) winMax.addEventListener('click', () => window.api.maximizeWindow?.());
+  if (winClose) winClose.addEventListener('click', () => window.api.closeWindow?.());
 
   const settings = await window.api.getSettings();
   applySettingsToUI(settings);
@@ -476,6 +495,20 @@ function updateDownloadDialog(task) {
   }
 }
 
+function openDeleteModal(taskId) {
+  const task = state.tasks.get(taskId);
+  if (!task) return;
+  pendingDeleteTaskId = taskId;
+  if (delFilenameDisplay) delFilenameDisplay.textContent = task.filename || 'download';
+  if (chkDeleteDiskFile) chkDeleteDiskFile.checked = false;
+  deleteConfirmModal?.classList.add('open');
+}
+
+function closeDeleteModal() {
+  pendingDeleteTaskId = null;
+  deleteConfirmModal?.classList.remove('open');
+}
+
 // ========================================================
 // FILTERING & SHORTCUTS
 // ========================================================
@@ -534,16 +567,14 @@ function setupFilterAndSortEvents() {
       schedulerDialogModal?.classList.remove('open');
       grabberDialogModal?.classList.remove('open');
       aboutDialogModal?.classList.remove('open');
+      closeDeleteModal();
     } else if (e.key === 'Insert' && !isInput) {
       openAddUrlDialog();
     } else if (e.key === 'Enter' && !isInput) {
       const id = getActiveOrSelectedTaskId();
       if (id) openDownloadStatus(id);
     } else if (e.key === 'Delete' && state.selectedTaskId && !isInput) {
-      const task = state.tasks.get(state.selectedTaskId);
-      if (task && confirm(`Delete "${task.filename}" and clean up temporary part files?`)) {
-        window.api.deleteDownload(state.selectedTaskId, false, false);
-      }
+      openDeleteModal(state.selectedTaskId);
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
       e.preventDefault();
       toggleSidebar();
@@ -635,11 +666,21 @@ function setupToolbarEvents() {
   document.getElementById('tbDelete').addEventListener('click', () => {
     const id = state.selectedTaskId || getActiveOrSelectedTaskId();
     if (id) {
-      const task = state.tasks.get(id);
-      const conf = confirm(`Delete "${task ? task.filename : 'download'}" and clean up temporary part files?`);
-      if (conf) window.api.deleteDownload(id, false, false);
+      openDeleteModal(id);
     }
   });
+
+  if (btnConfirmDelete) {
+    btnConfirmDelete.addEventListener('click', () => {
+      if (pendingDeleteTaskId) {
+        const deleteFile = chkDeleteDiskFile ? chkDeleteDiskFile.checked : false;
+        window.api.deleteDownload(pendingDeleteTaskId, deleteFile, false);
+      }
+      closeDeleteModal();
+    });
+  }
+  if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+  if (delDlgClose) delDlgClose.addEventListener('click', closeDeleteModal);
 
   document.getElementById('tbDeleteCompleted').addEventListener('click', () => {
     for (const task of state.tasks.values()) {
@@ -904,7 +945,8 @@ function setupIPCListeners() {
     state.tasks.set(task.id, task);
     renderTable();
     updateCategoryCounts();
-    if (task.status === 'downloading' || task.status === 'connecting' || task.status === 'pending') {
+    // Do NOT open progress window if task is pending (Download File Info permission dialog handles pending tasks)
+    if (task.status === 'downloading' || task.status === 'connecting') {
       openDownloadStatus(task.id);
     }
   });

@@ -1,36 +1,81 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download Progress - Internet Download Manager</title>
+  <title>Download Progress</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       margin: 0;
-      padding: 16px;
+      padding: 0;
       background: var(--bg-primary);
       color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
       user-select: none;
     }
+    .custom-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 32px;
+      padding: 0 10px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      -webkit-app-region: drag;
+    }
+    .titlebar-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .titlebar-controls {
+      display: flex;
+      align-items: center;
+      -webkit-app-region: no-drag;
+    }
+    .titlebar-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 28px;
+      height: 24px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+    .titlebar-btn:hover {
+      background: var(--table-row-hover);
+      color: var(--text-primary);
+    }
+    .titlebar-btn.close:hover {
+      background: var(--color-danger);
+      color: #ffffff;
+    }
     .progress-container {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: calc(100vh - 32px);
       box-sizing: border-box;
-      gap: 12px;
+      padding: 14px 16px;
+      gap: 10px;
     }
     .file-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--border-color);
     }
     .file-badge {
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: var(--radius-sm);
       background: var(--accent-color);
       color: #ffffff;
@@ -43,7 +88,7 @@
       min-width: 0;
     }
     .file-name {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-primary);
       white-space: nowrap;
@@ -62,10 +107,10 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
-      padding: 12px 14px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
     }
     .metric-row {
       display: flex;
@@ -87,7 +132,7 @@
       color: var(--color-success);
     }
     .progress-bar-wrap {
-      margin: 6px 0 2px 0;
+      margin: 4px 0 2px 0;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -141,12 +186,28 @@
       display: flex;
       justify-content: flex-end;
       gap: 8px;
-      padding-top: 10px;
+      padding-top: 8px;
       border-top: 1px solid var(--border-color);
     }
   </style>
 </head>
 <body>
+
+  <!-- Custom Frameless Titlebar -->
+  <div class="custom-titlebar">
+    <div class="titlebar-text">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      <span id="winTitleText">Download Progress</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn" id="btnProgMin" title="Minimize">—</button>
+      <button class="titlebar-btn close" id="btnProgClose" title="Close">✕</button>
+    </div>
+  </div>
 
   <div class="progress-container">
     <!-- Header -->

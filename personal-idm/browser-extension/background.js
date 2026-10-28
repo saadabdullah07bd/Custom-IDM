@@ -154,7 +154,7 @@ export async function sendToPersonalIDM(url, filename = '', options = {}) {
         body: JSON.stringify({
           url,
           filename,
-          autoStart: true
+          autoStart: options.autoStart !== undefined ? options.autoStart : true
         })
       });
 
@@ -227,7 +227,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalle
 
   chrome.downloads.onCreated.addListener(async (downloadItem) => {
     if (downloadItem.url && (downloadItem.url.startsWith('http://') || downloadItem.url.startsWith('https://'))) {
-      const success = await sendToPersonalIDM(downloadItem.url, downloadItem.filename);
+      const success = await sendToPersonalIDM(downloadItem.url, downloadItem.filename, { autoStart: false });
       if (success) {
         try {
           await chrome.downloads.cancel(downloadItem.id);

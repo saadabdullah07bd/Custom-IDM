@@ -4,7 +4,9 @@ contextBridge.exposeInMainWorld('api', {
   getTasks: () => ipcRenderer.invoke('get-tasks'),
   getTaskById: (taskId) => ipcRenderer.invoke('get-task-by-id', taskId),
   openProgressWindow: (taskId) => ipcRenderer.invoke('open-progress-window', taskId),
+  openDownloadInfo: (taskId) => ipcRenderer.invoke('open-download-info', taskId),
   addDownload: (options) => ipcRenderer.invoke('add-download', options),
+  startDownloadNow: (taskId) => ipcRenderer.invoke('start-download-now', taskId),
   probeUrl: (url) => ipcRenderer.invoke('probe-url', url),
   pauseDownload: (id) => ipcRenderer.invoke('pause-download', id),
   resumeDownload: (id) => ipcRenderer.invoke('resume-download', id),
@@ -18,6 +20,11 @@ contextBridge.exposeInMainWorld('api', {
   getServerPort: () => ipcRenderer.invoke('get-server-port'),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+
+  // Custom Window Controls
+  minimizeWindow: () => ipcRenderer.invoke('window-minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
+  closeWindow: () => ipcRenderer.invoke('window-close'),
 
   onTaskAdded: (callback) => ipcRenderer.on('task-added', (_event, value) => callback(value)),
   onTaskUpdated: (callback) => ipcRenderer.on('task-updated', (_event, value) => callback(value)),

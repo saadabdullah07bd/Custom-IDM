@@ -41,6 +41,8 @@ function updateUI(task) {
   const percent = Math.min(100, Math.max(0, task.percentage || 0));
 
   document.title = `${percent}% of ${task.filename || 'download'} - Internet Download Manager`;
+  const titleEl = document.getElementById('winTitleText');
+  if (titleEl) titleEl.textContent = `${percent}% of ${task.filename || 'download'}`;
 
   document.getElementById('progBadge').textContent = getFileBadgeText(task.filename);
   document.getElementById('progFileName').textContent = task.filename || 'download';
@@ -119,6 +121,13 @@ async function init() {
       currentTask.error = error;
       updateUI(currentTask);
     }
+  });
+
+  document.getElementById('btnProgMin')?.addEventListener('click', () => {
+    if (window.api.minimizeWindow) window.api.minimizeWindow();
+  });
+  document.getElementById('btnProgClose')?.addEventListener('click', () => {
+    window.close();
   });
 
   // Buttons

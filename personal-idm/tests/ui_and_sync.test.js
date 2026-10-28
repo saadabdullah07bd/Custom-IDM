@@ -234,3 +234,61 @@ test('Extension-Server Sync All 8 Cases: Port binding, fallback, discovery, rest
 
   await fs.promises.rm(tmpDir, { recursive: true, force: true });
 });
+
+// ============================================================================
+// PART 3: MODERN FRAMELESS UI, IDM PERMISSION DIALOG & MANIFEST V3 TESTS
+// ============================================================================
+
+test('Modern Frameless UI, IDM Permission Dialog, and Chrome Manifest V3 Compliance', async () => {
+  const extManifestPath = path.join(__dirname, '..', 'browser-extension', 'manifest.json');
+  const manifestRaw = await fs.promises.readFile(extManifestPath, 'utf8');
+  const manifest = JSON.parse(manifestRaw);
+
+  // 1. Chrome Manifest V3 compliance check
+  assert.equal(manifest.manifest_version, 3, 'Manifest version must be 3');
+  assert.ok(manifest.background?.service_worker, 'Manifest background must use service_worker in MV3');
+  assert.equal(
+    manifest.background?.scripts,
+    undefined,
+    'Manifest background MUST NOT contain "scripts" property to prevent "manifest version of 2 or lower" error in Chrome'
+  );
+
+  // 2. Frameless window controls check in index.html
+  const indexHtml = await fs.promises.readFile(path.join(RENDERER_DIR, 'index.html'), 'utf8');
+  assert.match(indexHtml, /id="winBtnMin"/, 'Index HTML must include custom minimize button');
+  assert.match(indexHtml, /id="winBtnMax"/, 'Index HTML must include custom maximize button');
+  assert.match(indexHtml, /id="winBtnClose"/, 'Index HTML must include custom close button');
+
+  // 3. Left panel categories sidebar collapse & expand controls
+  assert.match(indexHtml, /id="btnCollapseSidebar"/, 'Index HTML must include collapse button inside categories panel');
+  assert.match(indexHtml, /id="btnExpandSidebar"/, 'Index HTML must include expand tab for collapsed state');
+
+  // 4. Custom theme-matching Delete confirmation modal
+  assert.match(indexHtml, /id="deleteConfirmModal"/, 'Index HTML must include custom delete modal backdrop');
+  assert.match(indexHtml, /id="delFilenameDisplay"/, 'Delete modal must display target filename');
+  assert.match(indexHtml, /id="chkDeleteDiskFile"/, 'Delete modal must include disk cleanup checkbox option');
+  assert.match(indexHtml, /id="btnConfirmDelete"/, 'Delete modal must include confirm delete button');
+
+  // 5. Dedicated IDM Permission dialog (download-info.html & download-info.js)
+  const infoHtmlPath = path.join(RENDERER_DIR, 'download-info.html');
+  const infoJsPath = path.join(RENDERER_DIR, 'download-info.js');
+  assert.ok(fs.existsSync(infoHtmlPath), 'download-info.html permission window must exist');
+  assert.ok(fs.existsSync(infoJsPath), 'download-info.js controller must exist');
+
+  const infoHtml = await fs.promises.readFile(infoHtmlPath, 'utf8');
+  assert.match(infoHtml, /id="btnStartDownload"/, 'Download Info dialog must have "Start Download" permission button');
+  assert.match(infoHtml, /id="btnCancel"/, 'Download Info dialog must have Cancel button');
+  assert.match(infoHtml, /id="infoUrl"/, 'Download Info dialog must display intercepted URL');
+  assert.match(infoHtml, /id="infoSavePath"/, 'Download Info dialog must provide Save As directory path');
+  assert.match(infoHtml, /id="infoCategory"/, 'Download Info dialog must provide category selector');
+
+  // 6. Main Process has openDownloadInfoWindow and frameless titleBarStyle
+  const mainJs = await fs.promises.readFile(path.join(__dirname, '..', 'src', 'main', 'main.js'), 'utf8');
+  assert.match(mainJs, /openDownloadInfoWindow/, 'main.js must define openDownloadInfoWindow handler');
+  assert.match(mainJs, /Menu\.setApplicationMenu\(null\)/, 'main.js must disable Chromium File/Edit/View menu globally');
+
+  // 7. Zero horizontal scrollbar styles in style.css
+  const styleCss = await fs.promises.readFile(path.join(RENDERER_DIR, 'style.css'), 'utf8');
+  assert.match(styleCss, /table-layout:\s*fixed;/, 'style.css must enforce fixed table layout to prevent horizontal scrollbars');
+  assert.match(styleCss, /overflow-x:\s*hidden/, 'style.css must prevent horizontal overflowing');
+});

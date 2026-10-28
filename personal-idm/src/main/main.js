@@ -1,15 +1,19 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, dialog, shell } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { QueueManager } from '../engine/queueManager.js';
 import { startLocalServer } from '../bridge/localServer.js';
 import { probeUrl, getCategoryByFilename, getCategoryFolderName, calculateOptimalConnections } from '../engine/downloader.js';
 
+// Disable default OS / Chromium menubar completely (No "File Edit View Window")
+Menu.setApplicationMenu(null);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow = null;
 const progressWindows = new Map(); // taskId -> BrowserWindow
+const downloadInfoWindows = new Map(); // taskId -> BrowserWindow
 const queueManager = new QueueManager();
 
 let activeServerPort = 1001;
@@ -23,6 +27,52 @@ function forwardToAll(channel, payload) {
       win.webContents.send(channel, payload);
     }
   }
+  for (const win of downloadInfoWindows.values()) {
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(channel, payload);
+    }
+  }
+}
+
+function openDownloadInfoWindow(taskId) {
+  if (!taskId) return;
+  if (downloadInfoWindows.has(taskId)) {
+    const existing = downloadInfoWindows.get(taskId);
+    if (!existing.isDestroyed()) {
+      existing.show();
+      existing.focus();
+      return;
+    }
+    downloadInfoWindows.delete(taskId);
+  }
+
+  const task = queueManager.getTask(taskId);
+  const win = new BrowserWindow({
+    width: 500,
+    height: 380,
+    minWidth: 460,
+    minHeight: 330,
+    frame: false,
+    titleBarStyle: 'hidden',
+    resizable: true,
+    backgroundColor: '#090d16',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  win.setMenu(null);
+  win.loadFile(path.join(__dirname, '../renderer/download-info.html'), {
+    query: { taskId }
+  });
+
+  downloadInfoWindows.set(taskId, win);
+
+  win.on('closed', () => {
+    downloadInfoWindows.delete(taskId);
+  });
 }
 
 function createWindow() {
@@ -31,8 +81,10 @@ function createWindow() {
     height: 680,
     minWidth: 840,
     minHeight: 500,
+    frame: false, // 100% custom titlebar, no OS window frame
+    titleBarStyle: 'hidden',
     title: 'Personal IDM',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#090d16',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -40,16 +92,43 @@ function createWindow() {
     }
   });
 
+  mainWindow.setMenu(null);
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-  // Forward queueManager events to renderer window and all progress windows
-  queueManager.on('task-added', (task) => forwardToAll('task-added', task));
+  // Forward queueManager events
+  queueManager.on('task-added', (task) => {
+    forwardToAll('task-added', task);
+    // When a download is added as pending (e.g. from extension), open the IDM Download File Info permission window!
+    // The main app window stays untouched and does NOT pop open!
+    if (task.status === 'pending') {
+      openDownloadInfoWindow(task.id);
+    }
+  });
   queueManager.on('task-updated', (task) => forwardToAll('task-updated', task));
   queueManager.on('task-completed', (task) => forwardToAll('task-completed', task));
   queueManager.on('task-deleted', (id) => forwardToAll('task-deleted', id));
   queueManager.on('task-error', (err) => forwardToAll('task-error', err));
   queueManager.on('settings-updated', (settings) => forwardToAll('settings-updated', settings));
 }
+
+// Window Control IPC Handlers
+ipcMain.handle('window-minimize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) win.minimize();
+});
+
+ipcMain.handle('window-maximize', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) {
+    if (win.isMaximized()) win.unmaximize();
+    else win.maximize();
+  }
+});
+
+ipcMain.handle('window-close', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) win.close();
+});
 
 // IPC Handlers
 ipcMain.handle('get-tasks', () => queueManager.getAllTasks());
@@ -61,6 +140,16 @@ ipcMain.handle('get-task-by-id', (_event, taskId) => {
 
 ipcMain.handle('add-download', async (_event, options) => {
   return await queueManager.addTask(options);
+});
+
+ipcMain.handle('start-download-now', (_event, taskId) => {
+  queueManager.startTask(taskId);
+  return true;
+});
+
+ipcMain.handle('open-download-info', (_event, taskId) => {
+  openDownloadInfoWindow(taskId);
+  return true;
 });
 
 ipcMain.handle('open-progress-window', (_event, taskId) => {
@@ -78,12 +167,14 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
   const task = queueManager.getTask(taskId);
   const win = new BrowserWindow({
     width: 540,
-    height: 420,
+    height: 400,
     minWidth: 460,
-    minHeight: 360,
+    minHeight: 340,
+    frame: false,
+    titleBarStyle: 'hidden',
     title: task ? `${task.filename || 'Download'} - Internet Download Manager` : 'Download Progress',
     resizable: true,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#090d16',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -91,6 +182,7 @@ ipcMain.handle('open-progress-window', (_event, taskId) => {
     }
   });
 
+  win.setMenu(null);
   win.loadFile(path.join(__dirname, '../renderer/progress.html'), {
     query: { taskId }
   });
@@ -156,7 +248,8 @@ ipcMain.handle('get-settings', () => queueManager.getSettings());
 ipcMain.handle('save-settings', (_event, settings) => queueManager.updateSettings(settings));
 
 ipcMain.handle('select-directory', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, {
+  const targetWin = mainWindow || BrowserWindow.getFocusedWindow();
+  const result = await dialog.showOpenDialog(targetWin, {
     properties: ['openDirectory', 'createDirectory']
   });
   if (!result.canceled && result.filePaths.length > 0) {
